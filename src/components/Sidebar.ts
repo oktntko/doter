@@ -1,8 +1,14 @@
 import blessed, { Widgets } from "blessed";
 import type { Position } from "../app";
 
-export const attach = (screen: Widgets.Screen, position: Position) => {
-  const list: Widgets.ListElement = blessed.list({
+export const attach = (
+  screen: Widgets.Screen,
+  position: Position,
+  menu: string[],
+  onSelectItem: (item: Widgets.BlessedElement, index: number) => void,
+  onSelect: (item: Widgets.BlessedElement, index: number) => void
+) => {
+  const list = blessed.list({
     parent: screen,
     top: position.top,
     left: position.left,
@@ -17,10 +23,11 @@ export const attach = (screen: Widgets.Screen, position: Position) => {
     noCellBorders: true,
     tags: true, // 色付けする場合
     wrap: false,
-    items: ["CONTAINERS", "IMAGES", "HELP", "LICENSE"],
+    items: menu,
   });
-  list.on("select item", (item: Widgets.BlessedElement, index: number) => {});
-  list.on("select", (item: Widgets.BoxElement, index: number) => {});
+
+  list.on("select item", onSelectItem);
+  list.on("select", onSelect);
 
   return list;
 };

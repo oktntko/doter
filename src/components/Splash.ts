@@ -6,7 +6,7 @@ export const attach = (
   position: Position,
   onEnter: (screen: Widgets.Screen) => void
 ) => {
-  const splash = blessed.box({
+  const splash = blessed.button({
     parent: screen,
     top: position.top,
     left: position.left,
