@@ -1,0 +1,76 @@
+{
+  "[html]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  },
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "editor.formatOnSave": true,
+  "editor.rulers": [100],
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "prettier.endOfLine": "lf",
+  "prettier.printWidth": 100,
+  "prettier.semi": true,
+  "prettier.singleQuote": false,
+  "better-comments.tags": [
+    {
+      "tag": "#", // white 見出し
+      "color": "#f92672",
+      "bold": true
+    },
+    {
+      "tag": "~", // 打消し線
+      "strikethrough": true
+    },
+    {
+      "tag": ":", // 太字
+      "bold": true
+    },
+    {
+      "tag": "!", // red is-danger
+      "color": "#ff3860"
+    },
+    {
+      "tag": "?", // blue is-info
+      "color": "#209cee"
+    },
+    {
+      "tag": "@", // yellow is-warning
+      "color": "#ffdd57"
+    },
+    {
+      "tag": "+", // green is-success
+      "color": "#23d160"
+    }
+  ]
+}
