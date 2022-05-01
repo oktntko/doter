@@ -1,5 +1,5 @@
 import blessed, { Widgets } from "blessed";
-import { Position } from "../app";
+import type { Position } from "../app";
 
 export const attach = (parent: Widgets.Node, position: Position) => {
   const div = blessed.box({

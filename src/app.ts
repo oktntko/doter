@@ -7,7 +7,6 @@ export const screen = blessed.screen({
   autoPadding: true,
   smartCSR: true,
   fullUnicode: true,
-  title: "DOTER",
 });
 screen.key(["escape", "q", "C-[", "C-c"], () => process.exit(0));
 

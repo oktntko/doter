@@ -4,16 +4,24 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint --ext .js,.ts src"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "blessed": "^0.1.81"
+    "blessed": "^0.1.81",
+    "log4js": "^6.4.6"
   },
   "devDependencies": {
     "@types/blessed": "^0.1.19",
+    "@typescript-eslint/eslint-plugin": "^5.21.0",
+    "@typescript-eslint/parser": "^5.21.0",
+    "eslint": "^8.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.6.2",
     "ts-node": "^10.7.0"
   }
 }

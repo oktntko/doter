@@ -32,7 +32,7 @@ export const attach = (screen: Widgets.Screen, position: Position) => {
 
       screen.render();
     },
-    handleSelect: (item: Widgets.BlessedElement, index: number) => {
+    handleSelect: () => {
       child.focus();
       screen.render();
     },
