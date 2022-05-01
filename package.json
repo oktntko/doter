@@ -2,9 +2,10 @@
   "name": "doter",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "dev": "node --no-warnings --experimental-loader=ts-node/esm --es-module-specifier-resolution=node src/index.ts",
     "lint": "eslint --ext .js,.ts src"
   },
   "keywords": [],
@@ -12,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "blessed": "^0.1.81",
-    "log4js": "^6.4.6"
+    "log4js": "^6.4.6",
+    "zx": "^6.1.0"
   },
   "devDependencies": {
     "@types/blessed": "^0.1.19",

@@ -1,4 +1,5 @@
-import blessed, { Widgets } from "blessed";
+import type { Widgets } from "blessed";
+import blessed from "blessed";
 import type { Position } from "../app";
 
 export const attach = (
@@ -8,7 +9,7 @@ export const attach = (
   onSelectItem: (item: Widgets.BlessedElement, index: number) => void,
   onSelect: (item: Widgets.BlessedElement, index: number) => void
 ) => {
-  const list = blessed.list({
+  const sidebar = blessed.list({
     parent: screen,
     top: position.top,
     left: position.left,
@@ -26,8 +27,8 @@ export const attach = (
     items: menu,
   });
 
-  list.on("select item", onSelectItem);
-  list.on("select", onSelect);
+  sidebar.on("select item", onSelectItem);
+  sidebar.on("select", onSelect);
 
-  return list;
+  return sidebar;
 };

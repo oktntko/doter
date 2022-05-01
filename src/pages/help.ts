@@ -1,4 +1,5 @@
-import blessed, { Widgets } from "blessed";
+import type { Widgets } from "blessed";
+import blessed from "blessed";
 import { Position } from "../app";
 
 export const attach = (parent: Widgets.Node, position: Position) => {

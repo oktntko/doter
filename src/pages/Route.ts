@@ -1,4 +1,4 @@
-import { Widgets } from "blessed";
+import type { Widgets } from "blessed";
 import type { Position } from "../app";
 import * as Containers from "./containers";
 import * as Help from "./help";
