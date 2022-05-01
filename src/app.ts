@@ -1,4 +1,5 @@
 import blessed from "blessed";
+import type { Widgets } from "blessed";
 import * as Sidebar from "./components/Sidebar";
 import * as Splash from "./components/Splash";
 import * as Route from "./pages/Route";
@@ -9,6 +10,11 @@ export const screen = blessed.screen({
   fullUnicode: true,
 });
 screen.key(["escape", "q", "C-[", "C-c"], () => process.exit(0));
+screen.on("keypress", (ch: string, key: Widgets.Events.IKeyEventArg) => {
+  if (key.full === "tab") {
+    screen.focusNext();
+  }
+});
 
 export type Position = {
   top: number | string;

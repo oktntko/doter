@@ -15,12 +15,12 @@ export const attach = (
     width: position.width,
     mouse: true,
     keys: true,
-    border: {
-      type: "line",
-    },
     tags: true,
-    fg: "blue",
+    style: { fg: "blue" },
     content: `
+
+
+
                                                                                                                        1-..
                                                                                                                         <?=?.          /|.>
                                                                                                                           ????==    ?/==1.

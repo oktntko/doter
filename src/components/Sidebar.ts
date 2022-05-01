@@ -25,6 +25,8 @@ export const attach = (
     tags: true, // 色付けする場合
     wrap: false,
     items: menu,
+    // @ts-ignore ListElementStyle への入れ漏れでは
+    style: { focus: { border: { fg: "yellow" } } },
   });
 
   sidebar.on("select item", onSelectItem);

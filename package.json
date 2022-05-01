@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^0.27.2",
     "blessed": "^0.1.81",
+    "dayjs": "^1.11.1",
     "log4js": "^6.4.6"
   },
   "devDependencies": {
