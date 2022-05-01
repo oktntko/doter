@@ -10,8 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "blessed": "^0.1.81",
-    "blessed-contrib": "^4.11.0"
+    "blessed": "^0.1.81"
   },
   "devDependencies": {
     "@types/blessed": "^0.1.19",

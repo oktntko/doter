@@ -1,29 +1,25 @@
 import blessed, { Widgets } from "blessed";
-import contrib from "blessed-contrib";
+import type { Position } from "../app";
 
 export const attach = (
   screen: Widgets.Screen,
-  grid: contrib.grid,
-  position: { top: number; left: number; height: number; width: number },
+  position: Position,
   onEnter: (screen: Widgets.Screen) => void
 ) => {
-  const splash: Widgets.ButtonElement = grid.set(
-    position.top,
-    position.left,
-    position.height,
-    position.width,
-    blessed.button,
-    {
-      parent: screen,
-      mouse: true,
-      keys: true,
-      border: {
-        type: "line",
-      },
-      style: {
-        fg: "blue",
-      },
-      content: `
+  const splash = blessed.box({
+    parent: screen,
+    top: position.top,
+    left: position.left,
+    height: position.height,
+    width: position.width,
+    mouse: true,
+    keys: true,
+    border: {
+      type: "line",
+    },
+    tags: true,
+    fg: "blue",
+    content: `
                                                                                                                        1-..
                                                                                                                         <?=?.          /|.>
                                                                                                                           ????==    ?/==1.
@@ -33,12 +29,12 @@ export const attach = (
                                                                                ....gMMMMMMMMMMMMMMMMMMNNNg...?!      .(??!>
                                                                              .dNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNg..  .(<!>
                                                                            .MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN.
-                                                                          (MMMMMN   MMMMMMMMMMMMMMMMMMMNMMNMMNMMMMMMNe
-                                                                         (MMMMMNMMN   MMMMMMMNMMNMMMMMMMMMMNMMMMNMMMMMN,
-                                                                        dMMMMMMNMMMMMMM   MMMNMMMMMMMMMMNMMMMMMMMMMNMMMMMN,
-                                                                        MMMMMMMMNMM   MMMMMMMMMMMMMMMMNMMNMMMMMNMMMMMMMNMMMN,
-                                                                        MMMMMMMNM   MMMMMMMMMMMMMMMMMMMMMMMMNMMMMMNMMMMMMMMMMp
-                                                                       .JMNMMNMMMMMMMMMMMMM         MMMNMMNMMMNMMNMMNMNMMNMMMNe.
+                                                                          (MMMMMN{green-bg}   {/}MMMMMMMMMMMMMMMMMMMNMMNMMNMMMMMMNe
+                                                                         (MMMMMNMMN{green-bg}   {/}MMMMMMMNMMNMMMMMMMMMMNMMMMNMMMMMN,
+                                                                        dMMMMNMMMMMMM{green-bg}   {/}MMMNMMMMMMMMMMNMMMMMMMMMMNMMMMMN,
+                                                                        MMMMMMMMNMM{green-bg}   {/}MMMMMMMMMMMMMMMMNMMNMMMMMNMMMMMMMNMMMN,
+                                                                        MMMMMMMNM{green-bg}   {/}MMMMMMMMMMMMMMMMMMMMMMMMNMMMMMNMMMMMMMMMMp
+                                                                       .JMNMMNMMMMMMMMMMMMM{green-bg}         {/}MMMNMMNMMMNMMNMMNMNMMNMMMNe.
                                                                         ,MMMMMMMNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNMMMMN,              .gp
                                                                          (MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNMMNMNMMNMMNMMNMMMMMNMMMMk.            .MMm,          +gg,
                                                                           .MM=!' ,      .      ("""MMMMNMMMMMMNMMMMMMMMNMMMNMMMMMMN,            -MMMN      ..+g,
@@ -54,7 +50,7 @@ export const attach = (
                                                                                                                                    ..JJ+dXVY""!
 
 
-
+{green-fg}
                                                                                                                   ,----,
                                                                                                                 ,/   .'|
                                                                                      ,---,                    ,'   .'  :     ,---,. ,-.----.
@@ -70,9 +66,8 @@ export const attach = (
                                                                                  ;   :  .'       '----'       '---'      |   :   .' :   : :-'
                                                                                  |   ,.'                                 |   | ,'   |   |.'
                                                                                  '---'                                   '----'     '---'
-      `,
-    }
-  );
+{/}      `,
+  });
 
   splash.on("press", () => onEnter(screen));
   splash.on("click", () => onEnter(screen));
