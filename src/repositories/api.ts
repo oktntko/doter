@@ -6,7 +6,7 @@ import { spawn } from "child_process";
 export const api = {
   // # Container
   // : https://docs.docker.com/engine/api/v1.41/#tag/Container
-  container: {
+  containers: {
     list: async (params: paths["/containers/json"]["get"]["parameters"]["query"] = {}) => {
       access.debug("/containers/json");
       return client.get<paths["/containers/json"]["get"]["responses"]["200"]["schema"]>(
@@ -46,6 +46,18 @@ export const api = {
       if (params.stderr) command.stderr.on("data", (chunk: string) => callback(chunk.toString()));
 
       return command;
+    },
+    start: async (path: paths["/containers/{id}/start"]["post"]["parameters"]["path"]) => {
+      access.debug(`/containers/${path.id}/start`);
+      return client.post<paths["/containers/{id}/start"]["post"]["responses"]["204"]>(
+        `/containers/${path.id}/start`
+      );
+    },
+    stop: async (path: paths["/containers/{id}/stop"]["post"]["parameters"]["path"]) => {
+      access.debug(`/containers/${path.id}/stop`);
+      return client.post<paths["/containers/{id}/stop"]["post"]["responses"]["204"]>(
+        `/containers/${path.id}/stop`
+      );
     },
   },
 };

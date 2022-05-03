@@ -1,6 +1,7 @@
 import type { Widgets } from "blessed";
 import blessed from "blessed";
 import type { Position } from "../app";
+import log from "../plugins/log";
 import { api } from "../repositories/api";
 
 const ID_LENGTH = 12;
@@ -13,11 +14,12 @@ export const attach = (screen: Widgets.Screen, position: Position) => {
     keys: true,
   });
 
-  const listtable = attachListtable(screen, div);
-  const { details: _, refresh } = attachDetails(screen, div);
+  const { listtable, refresh: refreshList } = attachListtable(screen, div);
+  const { details: _, refresh } = attachDetails(screen, div, refreshList);
 
   listtable.on("select item", (item: Widgets.BlessedElement) => {
     const id = item.content.substring(0, ID_LENGTH);
+    log.debug(id);
     refresh(id);
   });
   listtable.on("select", () => screen.focusNext());
@@ -44,27 +46,47 @@ export const attachListtable = (screen: Widgets.Screen, parent: Widgets.Node) =>
     align: "left",
   });
 
-  api.container.list({ all: true }).then(({ data }) => {
-    const headers = ["CONTAINER ID", "NAMES", "STATE", "IMAGE", "PROJECT", "WORKING_DIR"];
-    const containers = data.map((container) => [
-      container.Id?.substring(0, ID_LENGTH) ?? "",
-      container.Names?.join(" ") ?? "",
-      `${
-        container.State === "running"
-          ? "{green-fg}"
-          : container.State === "exited"
-          ? "{blue-fg}"
-          : "{white-fg}"
-      }${container.State ?? "unknown"}{/}`,
-      container.Image?.substring(0, 32) ?? "",
-      container.Labels?.["com.docker.compose.project"] ?? "",
-      container.Labels?.["com.docker.compose.project.working_dir"] ?? "",
-    ]);
-    listtable.setData([headers, ...containers]);
-    screen.render();
-  });
+  const refresh = () => {
+    api.containers.list({ all: true }).then(({ data }) => {
+      const headers = [
+        "CONTAINER ID",
+        "NAMES",
+        "STATE",
+        "PORTS",
+        "IMAGE",
+        "PROJECT",
+        "WORKING_DIR",
+      ];
+      const containers = data.map((container) => [
+        container.Id?.substring(0, ID_LENGTH) ?? "",
+        container.Names?.join(" ") ?? "",
+        `${
+          container.State === "running"
+            ? "{green-fg}"
+            : container.State === "exited"
+            ? "{blue-fg}"
+            : "{white-fg}"
+        }${container.State ?? "unknown"}{/}`,
+        container.Ports?.map(
+          (port) =>
+            `${port.IP && port.PublicPort ? `${port.IP}:${port.PublicPort}->` : ""}${
+              port.PrivatePort
+            }/${port.Type}`
+        )
+          .join(" ")
+          .substring(0, 24) || "",
+        container.Image?.substring(0, 32) ?? "",
+        container.Labels?.["com.docker.compose.project"] ?? "",
+        container.Labels?.["com.docker.compose.project.working_dir"] ?? "",
+      ]);
+      listtable.setData([headers, ...containers]);
+      screen.render();
+    });
+  };
 
-  return listtable;
+  refresh();
+
+  return { listtable, refresh };
 };
 
 /**
@@ -79,7 +101,11 @@ LOG  /  CONFIG  /  EXEC
 ■■■■■■■■■■■■■■
 
  */
-export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
+export const attachDetails = (
+  screen: Widgets.Screen,
+  parent: Widgets.Node,
+  refreshList: () => void
+) => {
   const details = blessed.box({
     parent: parent,
     top: "24%",
@@ -123,7 +149,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     content: "",
   });
 
-  const start = blessed.button({
+  const startButton = blessed.button({
     parent: header,
     keyable: true,
     mouse: true,
@@ -137,7 +163,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
 
-  const stop = blessed.button({
+  const stopButton = blessed.button({
     parent: header,
     keyable: true,
     mouse: true,
@@ -150,8 +176,8 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     border: { type: "line" },
     style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
-  start.hide();
-  stop.hide();
+  startButton.hide();
+  stopButton.hide();
 
   const logButton = blessed.button({
     parent: header,
@@ -295,53 +321,118 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
 
   onEnter({ log: true })();
 
-  return {
-    details,
-    refresh: (id: string) => {
-      api.container.inspect({ id }).then(({ data }) => {
-        name.setContent(`{bold}${data.Name ?? "unknown"}{/}`);
-
-        const statusText = data.State?.Status;
-        if (statusText === "running") {
-          status.setContent(`{green-fg}${statusText}{/}`);
-
-          start.on("press", () => ({}));
-          start.hide();
-
-          stop.on("press", () => ({}));
-          stop.show();
-        } else if (statusText === "exited") {
-          status.setContent(`{blue-fg}${statusText}{/}`);
-
-          start.on("press", () => ({}));
-          start.show();
-
-          stop.on("press", () => ({}));
-          stop.hide();
-        } else {
-          status.setContent(statusText ?? "unknown");
-          start.on("press", () => ({}));
-          start.hide();
-          stop.on("press", () => ({}));
-          stop.hide();
-        }
-
-        configBlessed.setContent(JSON.stringify(data.Config, null, 3));
-        networkBlessed.setContent(JSON.stringify(data.NetworkSettings, null, 3));
-        mountsBlessed.setContent(JSON.stringify(data.Mounts, null, 3));
-
+  const start = (id: string) => () => {
+    api.containers
+      .start({ id })
+      .then(() => {
+        refresh(id);
+        refreshList();
+      })
+      .catch((error) => {
+        const message = blessed.message({
+          parent: parent,
+          top: "45%",
+          left: "40%",
+          height: "10%",
+          width: "20%",
+          mouse: true,
+          keys: true,
+          tags: true,
+          align: "center",
+          border: "line",
+          style: { border: { type: "line", fg: "red" } },
+        });
+        message.display(error.data.message, 3, () => ({}));
         screen.render();
       });
+  };
 
-      logBlessed.setContent("");
-      api.container.logs(
-        { id },
-        { follow: true, stdout: true, stderr: true, since: 0 },
-        (data: string) => {
-          logBlessed.log(data);
-          screen.render();
-        }
-      );
-    },
+  const stop = (id: string) => () => {
+    api.containers
+      .stop({ id })
+      .then(() => {
+        refresh(id);
+        refreshList();
+      })
+      .catch((error) => {
+        const message = blessed.message({
+          parent: parent,
+          top: "45%",
+          left: "40%",
+          height: "10%",
+          width: "20%",
+          mouse: true,
+          keys: true,
+          tags: true,
+          align: "center",
+          border: "line",
+          style: { border: { type: "line", fg: "red" } },
+        });
+        message.display(error.data.message, 3, () => ({}));
+        refreshList();
+        screen.render();
+      });
+  };
+
+  let onPressStartListener: null | ReturnType<typeof start> = null;
+  let onPressStopListener: null | ReturnType<typeof stop> = null;
+
+  const refresh = (id: string) => {
+    api.containers.inspect({ id }).then(({ data }) => {
+      name.setContent(`{bold}${data.Name ?? "unknown"}{/}`);
+
+      if (onPressStartListener) {
+        startButton.removeListener("press", onPressStartListener);
+        onPressStartListener = null;
+      }
+      if (onPressStopListener) {
+        stopButton.removeListener("press", onPressStopListener);
+        onPressStopListener = null;
+      }
+
+      const statusText = data.State?.Status;
+      if (statusText === "running") {
+        status.setContent(`{green-fg}${statusText}{/}`);
+
+        startButton.hide();
+
+        onPressStopListener = stop(id);
+        stopButton.on("press", onPressStopListener);
+        stopButton.show();
+      } else if (statusText === "exited") {
+        status.setContent(`{blue-fg}${statusText}{/}`);
+
+        onPressStartListener = start(id);
+        startButton.on("press", onPressStartListener);
+        startButton.show();
+
+        stopButton.hide();
+      } else {
+        status.setContent(statusText ?? "unknown");
+        startButton.hide();
+        stopButton.hide();
+      }
+
+      configBlessed.setContent(JSON.stringify(data.Config, null, 3));
+      networkBlessed.setContent(JSON.stringify(data.NetworkSettings, null, 3));
+      mountsBlessed.setContent(JSON.stringify(data.Mounts, null, 3));
+
+      screen.render();
+    });
+
+    logBlessed.setContent("");
+    api.containers.logs(
+      { id },
+      { follow: true, stdout: true, stderr: true, since: 0 },
+      (data: string) => {
+        logBlessed.log(data);
+        screen.render();
+      }
+    );
+  };
+
+  return {
+    details,
+    refresh,
   };
 };
