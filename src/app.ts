@@ -1,5 +1,5 @@
-import blessed from "blessed";
 import type { Widgets } from "blessed";
+import blessed from "blessed";
 import * as Sidebar from "./components/Sidebar";
 import * as Splash from "./components/Splash";
 import * as Route from "./pages/Route";
@@ -9,10 +9,13 @@ export const screen = blessed.screen({
   smartCSR: true,
   fullUnicode: true,
 });
+
 screen.key(["escape", "q", "C-[", "C-c"], () => process.exit(0));
-screen.on("keypress", (ch: string, key: Widgets.Events.IKeyEventArg) => {
+screen.on("keypress", (_: string, key: Widgets.Events.IKeyEventArg) => {
   if (key.full === "tab") {
     screen.focusNext();
+  } else if (key.full === "S-tab") {
+    screen.focusPrevious();
   }
 });
 
@@ -31,7 +34,8 @@ export const main = async () => {
       (screen) => {
         screen.remove(splash);
         resolve(null);
-      }
+      },
+      () => process.exit(0)
     );
     splash.focus();
     screen.render();
@@ -48,6 +52,5 @@ export const main = async () => {
   );
 
   sidebar.focus();
-
   screen.render();
 };

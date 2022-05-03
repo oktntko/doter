@@ -1,11 +1,14 @@
 import type { Widgets } from "blessed";
 import blessed from "blessed";
+import type { ExecException } from "child_process";
+import { exec } from "child_process";
 import type { Position } from "../app";
 
 export const attach = (
   screen: Widgets.Screen,
   position: Position,
-  onEnter: (screen: Widgets.Screen) => void
+  onEnter: (screen: Widgets.Screen) => void,
+  onError: (screen: Widgets.Screen, error: ExecException) => void
 ) => {
   const splash = blessed.button({
     parent: screen,
@@ -70,8 +73,33 @@ export const attach = (
 {/}      `,
   });
 
-  splash.on("press", () => onEnter(screen));
-  splash.on("click", () => onEnter(screen));
+  exec(/*shell*/ "service docker status", (error, stdout) => {
+    if (error) {
+      blessed.message({
+        parent: splash,
+        content: stdout,
+        top: "45%",
+        left: "40%",
+        height: "10%",
+        width: "20%",
+        mouse: true,
+        keys: true,
+        tags: true,
+        align: "center",
+        border: "line",
+        style: {
+          border: { type: "line", fg: "red" },
+        },
+      });
+      screen.render();
+
+      splash.on("press", () => onError(screen, error));
+      splash.on("click", () => onError(screen, error));
+    } else {
+      splash.on("press", () => onEnter(screen));
+      splash.on("click", () => onEnter(screen));
+    }
+  });
 
   return splash;
 };
