@@ -11,7 +11,7 @@ export const attach = (screen: Widgets.Screen, position: Position) => {
     mouse: true,
     keys: true,
     tags: true,
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
     content: "help",
   });
 

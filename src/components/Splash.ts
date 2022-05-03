@@ -87,9 +87,7 @@ export const attach = (
         tags: true,
         align: "center",
         border: "line",
-        style: {
-          border: { type: "line", fg: "red" },
-        },
+        style: { border: { type: "line", fg: "red" } },
       });
       screen.render();
 

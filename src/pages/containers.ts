@@ -134,7 +134,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 0,
     content: "START",
     border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
 
   const stop = blessed.button({
@@ -148,7 +148,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 0,
     content: " STOP ",
     border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
   start.hide();
   stop.hide();
@@ -164,7 +164,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 3,
     content: " LOG  ",
     border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
 
   const configButton = blessed.button({
@@ -178,10 +178,10 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 3,
     content: "CONFIG",
     border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
 
-  const execButton = blessed.button({
+  const networkButton = blessed.button({
     parent: header,
     keyable: true,
     mouse: true,
@@ -190,9 +190,23 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     padding: { left: 1, right: 1, top: 0, bottom: 0 },
     left: 18,
     top: 3,
-    content: " EXEC ",
+    content: "NETWORK",
     border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
+  });
+
+  const mountsButton = blessed.button({
+    parent: header,
+    keyable: true,
+    mouse: true,
+    keys: true,
+    shrink: true,
+    padding: { left: 1, right: 1, top: 0, bottom: 0 },
+    left: 28,
+    top: 3,
+    content: "MOUNTS",
+    border: { type: "line" },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
 
   const main = blessed.box({
@@ -216,7 +230,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     height: "100%",
     width: "100%",
     border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
 
   const configBlessed = blessed.log({
@@ -230,10 +244,10 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     height: "100%",
     width: "100%",
     border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
 
-  const execBlessed = blessed.text({
+  const networkBlessed = blessed.log({
     parent: main,
     focusable: true,
     keyable: true,
@@ -244,38 +258,42 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     height: "100%",
     width: "100%",
     border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } } },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
   });
 
-  const onEnterLogButton = () => {
-    logBlessed.show();
-    configBlessed.hide();
-    execBlessed.hide();
-    screen.render();
-  };
+  const mountsBlessed = blessed.log({
+    parent: main,
+    focusable: true,
+    keyable: true,
+    mouse: true,
+    keys: true,
+    left: 0,
+    top: 0,
+    height: "100%",
+    width: "100%",
+    border: { type: "line" },
+    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
+  });
 
-  const onEnterConfigButton = () => {
-    logBlessed.hide();
-    configBlessed.show();
-    execBlessed.hide();
-    screen.render();
-  };
+  const onEnter =
+    (params: { log?: boolean; config?: boolean; network?: boolean; mounts?: boolean }) => () => {
+      params.log ? logBlessed.show() : logBlessed.hide();
+      params.config ? configBlessed.show() : configBlessed.hide();
+      params.network ? networkBlessed.show() : networkBlessed.hide();
+      params.mounts ? mountsBlessed.show() : mountsBlessed.hide();
+      screen.render();
+    };
 
-  const onEnterExecButton = () => {
-    logBlessed.hide();
-    configBlessed.hide();
-    execBlessed.show();
-    screen.render();
-  };
+  logButton.on("press", onEnter({ log: true }));
+  logButton.on("click", onEnter({ log: true }));
+  configButton.on("press", onEnter({ config: true }));
+  configButton.on("click", onEnter({ config: true }));
+  networkButton.on("press", onEnter({ network: true }));
+  networkButton.on("click", onEnter({ network: true }));
+  mountsButton.on("press", onEnter({ mounts: true }));
+  mountsButton.on("click", onEnter({ mounts: true }));
 
-  logButton.on("press", onEnterLogButton);
-  logButton.on("click", onEnterLogButton);
-  configButton.on("press", onEnterConfigButton);
-  configButton.on("click", onEnterConfigButton);
-  execButton.on("press", onEnterExecButton);
-  execButton.on("click", onEnterExecButton);
-
-  onEnterLogButton();
+  onEnter({ log: true })();
 
   return {
     details,
@@ -309,6 +327,8 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
         }
 
         configBlessed.setContent(JSON.stringify(data.Config, null, 3));
+        networkBlessed.setContent(JSON.stringify(data.NetworkSettings, null, 3));
+        mountsBlessed.setContent(JSON.stringify(data.Mounts, null, 3));
 
         screen.render();
       });
