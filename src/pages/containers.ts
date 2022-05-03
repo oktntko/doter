@@ -1,7 +1,7 @@
 import type { Widgets } from "blessed";
 import blessed from "blessed";
 import type { Position } from "../app";
-import { api } from "../plugins/axios";
+import { api } from "../repositories/api";
 
 const ID_LENGTH = 12;
 
@@ -76,7 +76,7 @@ export const attachListtable = (screen: Widgets.Screen, parent: Widgets.Node) =>
 Name
 State            START / STOP  REMOVE
 
-EXEC  /  LOG  /  CONFIG
+LOG  /  CONFIG  /  EXEC
 ■■■■■■■■■■■■■
 ■■■■■■■■■■■■
 ■■■■■■■■■■■■■
@@ -86,51 +86,56 @@ EXEC  /  LOG  /  CONFIG
 export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
   const details = blessed.box({
     parent: parent,
-    border: { type: "line" },
-    mouse: true,
-    keys: true,
-    tags: true,
     top: "24%",
     left: 0,
     height: "78%",
     width: "100%",
-    style: { focus: { border: { fg: "yellow" } } },
-    pad: 2,
+  });
+
+  blessed.text({
+    parent: details,
+    left: 1,
+    top: 0,
+    tags: true,
+    content: "{green-bg} {/} {green-fg}DETAILS{/} {green-bg} {/}",
+  });
+
+  const header = blessed.box({
+    parent: details,
+    left: 0,
+    top: 1,
+    height: "16%",
   });
 
   const name = blessed.text({
-    parent: details,
-    mouse: true,
-    keys: true,
+    parent: header,
     shrink: true,
     tags: true,
     padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 1,
-    top: 0,
+    left: 0,
+    top: 1,
     content: "",
   });
 
   const status = blessed.text({
-    parent: details,
-    mouse: true,
-    keys: true,
+    parent: header,
     shrink: true,
     tags: true,
     padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 1,
-    top: 2,
+    left: 32,
+    top: 1,
     content: "",
   });
 
   const start = blessed.button({
-    parent: details,
+    parent: header,
     keyable: true,
     mouse: true,
     keys: true,
     shrink: true,
     padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 16,
-    top: 1,
+    left: 48,
+    top: 0,
     content: "START",
     border: { type: "line" },
     style: {
@@ -139,15 +144,15 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
   });
 
   const stop = blessed.button({
-    parent: details,
+    parent: header,
     keyable: true,
     mouse: true,
     keys: true,
     shrink: true,
     padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 24,
-    top: 1,
-    content: "STOP",
+    left: 56,
+    top: 0,
+    content: " STOP ",
     border: { type: "line" },
     style: {
       focus: { border: { fg: "yellow" } },
@@ -156,11 +161,80 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
   start.hide();
   stop.hide();
 
+  const logButton = blessed.button({
+    parent: header,
+    keyable: true,
+    mouse: true,
+    keys: true,
+    shrink: true,
+    padding: { left: 1, right: 1, top: 0, bottom: 0 },
+    left: 0,
+    top: 3,
+    content: " LOG  ",
+    border: { type: "line" },
+    style: {
+      focus: { border: { fg: "yellow" } },
+    },
+  });
+
+  const configButton = blessed.button({
+    parent: header,
+    keyable: true,
+    mouse: true,
+    keys: true,
+    shrink: true,
+    padding: { left: 1, right: 1, top: 0, bottom: 0 },
+    left: 9,
+    top: 3,
+    content: "CONFIG",
+    border: { type: "line" },
+    style: {
+      focus: { border: { fg: "yellow" } },
+    },
+  });
+
+  const execButton = blessed.button({
+    parent: header,
+    keyable: true,
+    mouse: true,
+    keys: true,
+    shrink: true,
+    padding: { left: 1, right: 1, top: 0, bottom: 0 },
+    left: 18,
+    top: 3,
+    content: " EXEC ",
+    border: { type: "line" },
+    style: {
+      focus: { border: { fg: "yellow" } },
+    },
+  });
+
+  const main = blessed.box({
+    parent: details,
+    left: 0,
+    top: "16%",
+    height: "86%",
+    width: "100%",
+  });
+
+  const logBlessed = blessed.log({
+    parent: main,
+    keyable: true,
+    mouse: true,
+    keys: true,
+    left: 0,
+    top: 0,
+    height: "100%",
+    width: "100%",
+    border: { type: "line" },
+    style: { focus: { border: { fg: "yellow" } } },
+  });
+
   return {
     details,
     refresh: (id: string) => {
       api.container.inspect({ id }).then(({ data }) => {
-        name.setContent(`{#909399-bg} {/} {bold}${data.Name ?? "unknown"}{/}`);
+        name.setContent(`{bold}${data.Name ?? "unknown"}{/}`);
 
         const statusText = data.State?.Status;
         if (statusText === "running") {
@@ -189,6 +263,16 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
 
         screen.render();
       });
+
+      logBlessed.setContent("");
+      api.container.logs(
+        { id },
+        { follow: true, stdout: true, stderr: true, since: 0 },
+        (data: string) => {
+          logBlessed.log(data);
+          screen.render();
+        }
+      );
     },
   };
 };

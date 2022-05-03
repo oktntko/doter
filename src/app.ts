@@ -8,6 +8,7 @@ export const screen = blessed.screen({
   autoPadding: true,
   smartCSR: true,
   fullUnicode: true,
+  dockBorders: true,
 });
 
 screen.key(["escape", "q", "C-[", "C-c"], () => process.exit(0));
