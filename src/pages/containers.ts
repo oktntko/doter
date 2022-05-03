@@ -14,17 +14,13 @@ export const attach = (screen: Widgets.Screen, position: Position) => {
   });
 
   const listtable = attachListtable(screen, div);
-  const { details, refresh } = attachDetails(screen, div);
+  const { details: _, refresh } = attachDetails(screen, div);
 
   listtable.on("select item", (item: Widgets.BlessedElement) => {
     const id = item.content.substring(0, ID_LENGTH);
     refresh(id);
   });
-  listtable.on("select", () => {
-    if (details) details.focus();
-  });
-
-  div.on("focus", () => listtable.focus());
+  listtable.on("select", () => screen.focusNext());
 
   return div;
 };
@@ -138,9 +134,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 0,
     content: "START",
     border: { type: "line" },
-    style: {
-      focus: { border: { fg: "yellow" } },
-    },
+    style: { focus: { border: { fg: "yellow" } } },
   });
 
   const stop = blessed.button({
@@ -154,9 +148,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 0,
     content: " STOP ",
     border: { type: "line" },
-    style: {
-      focus: { border: { fg: "yellow" } },
-    },
+    style: { focus: { border: { fg: "yellow" } } },
   });
   start.hide();
   stop.hide();
@@ -172,9 +164,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 3,
     content: " LOG  ",
     border: { type: "line" },
-    style: {
-      focus: { border: { fg: "yellow" } },
-    },
+    style: { focus: { border: { fg: "yellow" } } },
   });
 
   const configButton = blessed.button({
@@ -188,9 +178,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 3,
     content: "CONFIG",
     border: { type: "line" },
-    style: {
-      focus: { border: { fg: "yellow" } },
-    },
+    style: { focus: { border: { fg: "yellow" } } },
   });
 
   const execButton = blessed.button({
@@ -204,13 +192,13 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     top: 3,
     content: " EXEC ",
     border: { type: "line" },
-    style: {
-      focus: { border: { fg: "yellow" } },
-    },
+    style: { focus: { border: { fg: "yellow" } } },
   });
 
   const main = blessed.box({
     parent: details,
+    mouse: true,
+    keys: true,
     left: 0,
     top: "16%",
     height: "86%",
@@ -219,6 +207,7 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
 
   const logBlessed = blessed.log({
     parent: main,
+    focusable: true,
     keyable: true,
     mouse: true,
     keys: true,
@@ -229,6 +218,64 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
     border: { type: "line" },
     style: { focus: { border: { fg: "yellow" } } },
   });
+
+  const configBlessed = blessed.log({
+    parent: main,
+    focusable: true,
+    keyable: true,
+    mouse: true,
+    keys: true,
+    left: 0,
+    top: 0,
+    height: "100%",
+    width: "100%",
+    border: { type: "line" },
+    style: { focus: { border: { fg: "yellow" } } },
+  });
+
+  const execBlessed = blessed.text({
+    parent: main,
+    focusable: true,
+    keyable: true,
+    mouse: true,
+    keys: true,
+    left: 0,
+    top: 0,
+    height: "100%",
+    width: "100%",
+    border: { type: "line" },
+    style: { focus: { border: { fg: "yellow" } } },
+  });
+
+  const onEnterLogButton = () => {
+    logBlessed.show();
+    configBlessed.hide();
+    execBlessed.hide();
+    screen.render();
+  };
+
+  const onEnterConfigButton = () => {
+    logBlessed.hide();
+    configBlessed.show();
+    execBlessed.hide();
+    screen.render();
+  };
+
+  const onEnterExecButton = () => {
+    logBlessed.hide();
+    configBlessed.hide();
+    execBlessed.show();
+    screen.render();
+  };
+
+  logButton.on("press", onEnterLogButton);
+  logButton.on("click", onEnterLogButton);
+  configButton.on("press", onEnterConfigButton);
+  configButton.on("click", onEnterConfigButton);
+  execButton.on("press", onEnterExecButton);
+  execButton.on("click", onEnterExecButton);
+
+  onEnterLogButton();
 
   return {
     details,
@@ -260,6 +307,8 @@ export const attachDetails = (screen: Widgets.Screen, parent: Widgets.Node) => {
           stop.on("press", () => ({}));
           stop.hide();
         }
+
+        configBlessed.setContent(JSON.stringify(data.Config, null, 3));
 
         screen.render();
       });

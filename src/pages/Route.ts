@@ -33,7 +33,7 @@ export const attach = (screen: Widgets.Screen, position: Position) => {
       screen.render();
     },
     handleSelect: () => {
-      page.focus();
+      screen.focusNext();
       screen.render();
     },
   };
