@@ -1,15 +1,27 @@
 {
   "name": "doter",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/index.ts",
     "lint": "eslint --ext .js,.ts src"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "bugs": "https://github.com/oktntko/doter/issues",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "homepage": "https://github.com/oktntko/doter",
+  "keywords": [
+    "docker",
+    "cui",
+    "tui",
+    "blessed",
+    "nodejs"
+  ],
+  "author": "oktntko",
+  "license": "MIT",
+  "repository": "oktntko/doter",
   "dependencies": {
     "axios": "^0.27.2",
     "blessed": "^0.1.81",
