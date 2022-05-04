@@ -4,9 +4,7 @@ import log from "../plugins/log";
 
 export const Splash = (props: { onEnter: () => void; onError: (message: string) => void }) => {
   useEffect(() => {
-    log.debug("created Splash");
     exec(/*shell*/ "service docker status", (error, stdout) => {
-      log.debug(stdout, error);
       if (error) {
         log.error(error);
         props.onError(stdout);
@@ -14,8 +12,6 @@ export const Splash = (props: { onEnter: () => void; onError: (message: string) 
         props.onEnter();
       }
     });
-
-    return () => log.debug("destory Splash");
   }, []);
 
   return (
@@ -25,7 +21,6 @@ export const Splash = (props: { onEnter: () => void; onError: (message: string) 
       height={"100%"}
       width={"100%"}
       keyable
-      clickable
       mouse
       keys
       tags

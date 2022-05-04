@@ -1,10 +1,11 @@
 import type { Widgets } from "blessed";
 import React, { useState } from "react";
 import { Position, screen } from "../app";
+import { ContainersPage } from "../pages/Containers";
 
 const menu = ["CONTAINERS", "IMAGES", "HELP", "LICENSE"] as const;
 
-export const Dashboard = () => {
+export const Dashboard = ({ onError }: { onError: (message: string) => void }) => {
   const [path, setPath] = useState<typeof menu[number]>("CONTAINERS");
   const handleSelectItem = (item: Widgets.BlessedElement) => {
     setPath(item.content as typeof menu[number]);
@@ -22,8 +23,8 @@ export const Dashboard = () => {
         height={"100%"}
         onSelectItem={handleSelectItem}
         onSelect={handleSelect}
-      ></Sidebar>
-      <RouterView top={0} left={"12%"} width={"88%"} height={"100%"} path={path}></RouterView>
+      />
+      <RouterView top={0} left={"12%"} path={path} onError={onError}></RouterView>
     </>
   );
 };
@@ -37,7 +38,6 @@ const Sidebar = (
   return (
     <list
       keyable
-      clickable
       mouse
       keys
       top={props.top}
@@ -58,32 +58,17 @@ const Sidebar = (
   );
 };
 
-const RouterView = (props: Position & { path: typeof menu[number] }) => {
+const RouterView = (
+  props: Position & { path: typeof menu[number]; onError: (message: string) => void }
+) => {
   const route = (path: typeof menu[number]) => {
     switch (path) {
       case "CONTAINERS":
-        return (
-          <box
-            keyable
-            clickable
-            mouse
-            keys
-            top={0}
-            left={0}
-            width={"100%"}
-            height={"100%"}
-            border={{ type: "line" }}
-            // @ts-ignore
-            style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
-          >
-            {"CONTAINERS"}
-          </box>
-        );
+        return <ContainersPage onError={props.onError} />;
       case "IMAGES":
         return (
           <box
             keyable
-            clickable
             mouse
             keys
             top={0}
@@ -101,7 +86,6 @@ const RouterView = (props: Position & { path: typeof menu[number] }) => {
         return (
           <box
             keyable
-            clickable
             mouse
             keys
             top={0}
@@ -119,7 +103,6 @@ const RouterView = (props: Position & { path: typeof menu[number] }) => {
         return (
           <box
             keyable
-            clickable
             mouse
             keys
             top={0}

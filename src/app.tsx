@@ -45,7 +45,7 @@ const App = () => {
   return (
     <>
       {splashing && <Splash onEnter={handleEnter} onError={handleError} />}
-      {!splashing && <Dashboard />}
+      {!splashing && <Dashboard onError={handleError} />}
 
       <message
         hidden={!errorMessage}
