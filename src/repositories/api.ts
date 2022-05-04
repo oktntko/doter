@@ -60,4 +60,14 @@ export const api = {
       );
     },
   },
+
+  images: {
+    list: async (params: paths["/images/json"]["get"]["parameters"]["query"] = {}) => {
+      access.debug("/images/json");
+      return client.get<paths["/images/json"]["get"]["responses"]["200"]["schema"]>(
+        "/images/json",
+        { params }
+      );
+    },
+  },
 };

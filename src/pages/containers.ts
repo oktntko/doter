@@ -1,7 +1,6 @@
 import type { Widgets } from "blessed";
 import blessed from "blessed";
 import type { Position } from "../app";
-import log from "../plugins/log";
 import { api } from "../repositories/api";
 
 const ID_LENGTH = 12;
@@ -19,7 +18,6 @@ export const attach = (screen: Widgets.Screen, position: Position) => {
 
   listtable.on("select item", (item: Widgets.BlessedElement) => {
     const id = item.content.substring(0, ID_LENGTH);
-    log.debug(id);
     refresh(id);
   });
   listtable.on("select", () => screen.focusNext());
@@ -110,7 +108,7 @@ export const attachDetails = (
     parent: parent,
     top: "24%",
     left: 0,
-    height: "78%",
+    height: "76%",
     width: "100%",
   });
 
