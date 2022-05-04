@@ -3,6 +3,7 @@ import blessed from "blessed";
 import React, { useState } from "react";
 import { render } from "react-blessed";
 import { Splash } from "./components/Splash";
+import { Dashboard } from "./layouts/Dashboard";
 
 export const screen = blessed.screen({
   autoPadding: true,
@@ -21,7 +22,13 @@ screen.on("keypress", (_: string, key: Widgets.Events.IKeyEventArg) => {
   }
 });
 
-// Rendering a simple centered box
+export type Position = {
+  top?: number | string;
+  left?: number | string;
+  width?: number | string;
+  height?: number | string;
+};
+
 const App = () => {
   const [splashing, setSplashing] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -38,26 +45,7 @@ const App = () => {
   return (
     <>
       {splashing && <Splash onEnter={handleEnter} onError={handleError} />}
-      {!splashing && (
-        <list
-          keyable
-          clickable
-          mouse
-          keys
-          top="50%"
-          left="center"
-          width="50%"
-          height="50%"
-          border={{ type: "line" }}
-          // @ts-ignore
-          style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
-          items={["a", "a", "a", "a"]}
-          selectedFg={"black"}
-          selectedBg={"white"}
-          onSelect={(item: Widgets.BlessedElement, index: number) => console.log(index)}
-          onSelectItem={(item: Widgets.BlessedElement, index: number) => console.log(index)}
-        ></list>
-      )}
+      {!splashing && <Dashboard />}
 
       <message
         hidden={!errorMessage}
