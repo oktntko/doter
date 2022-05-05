@@ -1,7 +1,7 @@
 import type { Widgets } from "blessed";
 import React, { useState } from "react";
 import { Position, screen } from "../app";
-import { ContainersPage } from "../pages/Containers";
+import { ContainersPage } from "../pages/ContainersPage";
 
 const menu = ["CONTAINERS", "IMAGES", "HELP", "LICENSE"] as const;
 
