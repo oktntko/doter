@@ -1,6 +1,6 @@
 import fs from "fs";
 import React, { useEffect, useState } from "react";
-import { displayMessage } from "../app";
+import { displayMessage } from "~/app";
 
 export const LicensePage = () => {
   const [content, setContent] = useState("");

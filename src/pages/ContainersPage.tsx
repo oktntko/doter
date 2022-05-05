@@ -1,7 +1,7 @@
 import type { Widgets } from "blessed";
 import React, { useEffect, useRef, useState } from "react";
-import { displayMessage, screen } from "../app";
-import { api } from "../repositories/api";
+import { displayMessage, screen } from "~/app";
+import { api } from "~/repositories/api";
 
 const ID_LENGTH = 12;
 

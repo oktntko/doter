@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import React, { useEffect } from "react";
-import { displayMessage } from "../app";
-import log from "../plugins/log";
+import { displayMessage } from "~/app";
+import log from "~/plugins/log";
 
 export const Splash = (props: { onEnter: () => void }) => {
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
-import { client } from "../plugins/axios";
-import { access } from "../plugins/log";
-import { paths } from "./docker-engine-api-1.41";
+import { client } from "~/plugins/axios";
+import { access } from "~/plugins/log";
+import { paths } from "~/repositories/docker-engine-api-1.41";
 
 export const api = {
   // # Container

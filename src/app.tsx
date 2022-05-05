@@ -2,8 +2,8 @@ import type { Widgets } from "blessed";
 import blessed from "blessed";
 import React, { useState } from "react";
 import { render } from "react-blessed";
-import { Splash } from "./components/Splash";
-import { Dashboard } from "./layouts/Dashboard";
+import { Splash } from "~/components/Splash";
+import { Dashboard } from "~/layouts/Dashboard";
 
 export const screen = blessed.screen({
   autoPadding: true,
@@ -65,6 +65,10 @@ const App = () => {
   );
 };
 
-export const main = () => {
+const main = () => {
   render(<App />, screen);
 };
+
+main();
+
+export const viteNodeApp = main;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { access } from "./log";
+import { access } from "~/plugins/log";
 
 export const client = axios.create();
 

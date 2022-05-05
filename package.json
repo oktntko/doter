@@ -1,12 +1,14 @@
 {
   "name": "doter",
   "version": "0.0.1",
-  "description": "",
-  "type": "module",
-  "main": "index.js",
+  "description": "I want to Docker Desktop even with Terminal!",
+  "main": "dist/app.js",
+  "bin": {
+    "doter": "dist/app.js"
+  },
   "scripts": {
-    "dev": "node --experimental-loader=ts-node/esm --es-module-specifier-resolution=node src/index.ts",
-    "build": "tsc",
+    "dev": "vite build && node dist/app.js",
+    "build": "vite build",
     "lint": "eslint --ext .js,.ts,.jsx,.tsx src"
   },
   "bugs": "https://github.com/oktntko/doter/issues",
@@ -16,7 +18,7 @@
   "homepage": "https://github.com/oktntko/doter",
   "keywords": [
     "docker",
-    "cui",
+    "react",
     "tui",
     "blessed",
     "nodejs"
@@ -33,6 +35,7 @@
     "react-blessed": "^0.7.2"
   },
   "devDependencies": {
+    "@swc/core": "^1.2.177",
     "@types/blessed": "^0.1.19",
     "@types/react-blessed": "^0.7.1",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
@@ -43,6 +46,7 @@
     "eslint-plugin-react": "^7.29.4",
     "openapi-typescript": "^5.2.0",
     "prettier": "^2.6.2",
-    "ts-node": "^10.7.0"
+    "vite": "^2.9.8",
+    "vite-plugin-node": "^0.0.19"
   }
 }

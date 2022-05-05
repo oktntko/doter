@@ -1,10 +1,10 @@
 import type { Widgets } from "blessed";
 import React, { useState } from "react";
-import { Position, screen } from "../app";
-import { ContainersPage } from "../pages/ContainersPage";
-import { HelpPage } from "../pages/HelpPage";
-import { ImagesPage } from "../pages/ImagesPage";
-import { LicensePage } from "../pages/LicensePage";
+import { Position, screen } from "~/app";
+import { ContainersPage } from "~/pages/ContainersPage";
+import { HelpPage } from "~/pages/HelpPage";
+import { ImagesPage } from "~/pages/ImagesPage";
+import { LicensePage } from "~/pages/LicensePage";
 
 const menu = ["CONTAINERS", "IMAGES", "HELP", "LICENSE"] as const;
 
