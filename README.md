@@ -45,6 +45,8 @@
 
 ## About The Project
 
+https://user-images.githubusercontent.com/72344657/166904227-ed0db615-dd6d-4415-ad30-b2d5da84c172.mp4
+
 I want to Docker Desktop in the terminal as well!  
 This is a TUI tool that allows you to interact with Docker on your terminal.  
 Development is done with Docker installed directly on WSL, so I don't know how it works in environments other than WSL.
