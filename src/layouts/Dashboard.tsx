@@ -2,6 +2,9 @@ import type { Widgets } from "blessed";
 import React, { useState } from "react";
 import { Position, screen } from "../app";
 import { ContainersPage } from "../pages/ContainersPage";
+import { HelpPage } from "../pages/HelpPage";
+import { ImagesPage } from "../pages/ImagesPage";
+import { LicensePage } from "../pages/LicensePage";
 
 const menu = ["CONTAINERS", "IMAGES", "HELP", "LICENSE"] as const;
 
@@ -64,56 +67,11 @@ const RouterView = (props: Position & { path: typeof menu[number] }) => {
       case "CONTAINERS":
         return <ContainersPage />;
       case "IMAGES":
-        return (
-          <box
-            keyable
-            mouse
-            keys
-            top={0}
-            left={0}
-            width={"100%"}
-            height={"100%"}
-            border={{ type: "line" }}
-            // @ts-ignore
-            style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
-          >
-            {"IMAGES"}
-          </box>
-        );
+        return <ImagesPage />;
       case "HELP":
-        return (
-          <box
-            keyable
-            mouse
-            keys
-            top={0}
-            left={0}
-            width={"100%"}
-            height={"100%"}
-            border={{ type: "line" }}
-            // @ts-ignore
-            style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
-          >
-            {"HELP"}
-          </box>
-        );
+        return <HelpPage />;
       case "LICENSE":
-        return (
-          <box
-            keyable
-            mouse
-            keys
-            top={0}
-            left={0}
-            width={"100%"}
-            height={"100%"}
-            border={{ type: "line" }}
-            // @ts-ignore
-            style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
-          >
-            {"LICENSE"}
-          </box>
-        );
+        return <LicensePage />;
     }
   };
 
