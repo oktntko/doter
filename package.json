@@ -4,7 +4,7 @@
   "description": "I want to Docker Desktop even with Terminal!",
   "main": "dist/app.js",
   "bin": {
-    "doter": "dist/app.js"
+    "doter": "bin/index.js"
   },
   "scripts": {
     "dev": "vite build && node dist/app.js",

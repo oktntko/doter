@@ -4,9 +4,8 @@ import { Position, screen } from "~/app";
 import { ContainersPage } from "~/pages/ContainersPage";
 import { HelpPage } from "~/pages/HelpPage";
 import { ImagesPage } from "~/pages/ImagesPage";
-import { LicensePage } from "~/pages/LicensePage";
 
-const menu = ["CONTAINERS", "IMAGES", "HELP", "LICENSE"] as const;
+const menu = ["CONTAINERS", "IMAGES", "HELP"] as const;
 
 export const Dashboard = () => {
   const [path, setPath] = useState<typeof menu[number]>("CONTAINERS");
@@ -70,8 +69,6 @@ const RouterView = (props: Position & { path: typeof menu[number] }) => {
         return <ImagesPage />;
       case "HELP":
         return <HelpPage />;
-      case "LICENSE":
-        return <LicensePage />;
     }
   };
 
