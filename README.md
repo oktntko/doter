@@ -8,7 +8,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/oktntko/doter">
-    <img src="src/assets/logo.png" alt="Logo" width="340" height="220">
+    <img src="assets/logo.png" alt="Logo" width="340" height="220">
   </a>
 
   <h3 align="center">DOTER</h3>
@@ -44,8 +44,6 @@
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
-
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
 
 I want to Docker Desktop in the terminal as well!  
 This is a TUI tool that allows you to interact with Docker on your terminal.  
