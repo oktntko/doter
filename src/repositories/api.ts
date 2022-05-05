@@ -102,5 +102,17 @@ export const api = {
         { params }
       );
     },
+    history: async (path: paths["/images/{name}/history"]["get"]["parameters"]["path"]) => {
+      access.debug(`/images/${path.name}/history`);
+      return client.get<paths["/images/{name}/history"]["get"]["responses"]["200"]["schema"]>(
+        `/images/${path.name}/history`
+      );
+    },
+    inspect: async (path: paths["/images/{name}/json"]["get"]["parameters"]["path"]) => {
+      access.debug(`/images/${path.name}/json`);
+      return client.get<paths["/images/{name}/json"]["get"]["responses"]["200"]["schema"]>(
+        `/images/${path.name}/json`
+      );
+    },
   },
 };

@@ -71,8 +71,69 @@ export const ImagesPage = () => {
 
       <line orientation="vertical" top={"24%"} left={0} height={1} width={"100%"} fg="grey"></line>
 
-      {/* 豆知識 height, widthの指定を省略すると、「残りすべて」になる */}
-      <box top={"25%"} left={0} border={{ type: "line" }}></box>
+      <box top={"25%"} left={0} width={"100%"}>
+        <ImageHistoryList image_id={image_id} />
+      </box>
+    </>
+  );
+};
+
+export const ImageHistoryList = ({ image_id }: { image_id: string }) => {
+  const ref = useRef<Widgets.ListTableElement | null>(null);
+  const [selected, setSelected] = useState<number>(0);
+
+  const handleSelectItem = (item: Widgets.BlessedElement, i: number) => {
+    setSelected(i);
+  };
+
+  useEffect(() => {
+    refreshImageHistory(image_id);
+  }, [image_id]);
+
+  // + methods
+  const refreshImageHistory = (id: string) => {
+    if (!id) return;
+
+    api.images.history({ name: id }).then(({ data }) => {
+      const headers = ["NO", "CREATED", "CREATED BY", "SIZE", "COMMENT"];
+      const histories = data.map((history, i) => [
+        String(i + 1),
+        dayjs(history.Created * 1000).format("YYYY-MM-DD HH:mm:ss"),
+        history.CreatedBy.replace(/(\s|&nbsp;)+/g, " ").substring(0, 144),
+        `${(history.Size / (1000 * 1000)).toLocaleString()}MB`,
+        history.Comment,
+      ]);
+
+      ref.current?.setData([headers, ...histories]);
+    });
+  };
+
+  return (
+    <>
+      <listtable
+        ref={ref}
+        keyable
+        mouse
+        keys
+        tags
+        top={0}
+        left={0}
+        height={"100%"}
+        width={"100%"}
+        border={{ type: "line" }}
+        style={{
+          header: { fg: "green" },
+          // @ts-ignore
+          focus: { border: { fg: "yellow" } },
+          // @ts-ignore
+          hover: { border: { fg: "blue" } },
+        }}
+        selectedFg={"black"}
+        selectedBg={"white"}
+        align={"left"}
+        selected={selected}
+        onSelectItem={handleSelectItem}
+      ></listtable>
     </>
   );
 };
