@@ -1,5 +1,5 @@
 import fs from "fs";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { displayMessage } from "../app";
 
 export const LicensePage = () => {

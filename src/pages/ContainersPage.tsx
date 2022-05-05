@@ -1,5 +1,5 @@
 import type { Widgets } from "blessed";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { displayMessage, screen } from "../app";
 import { api } from "../repositories/api";
 
@@ -222,6 +222,7 @@ export const ContainerDetails = ({
             style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
             content={content}
             onClick={() => handleMenuSelected(content)}
+            // eslint-disable-next-line react/no-unknown-property
             onKeypress={(_, key) => handleMenuSelected(content, key)}
           />
         );
@@ -240,6 +241,7 @@ export const ContainerDetails = ({
         style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
         content={status === "running" ? "  STOP  " : " START  "}
         onClick={() => handleStartStopButton()}
+        // eslint-disable-next-line react/no-unknown-property
         onKeypress={(_, key) => handleStartStopButton(key)}
       />
 
