@@ -5,7 +5,7 @@ import { ContainersPage } from "../pages/Containers";
 
 const menu = ["CONTAINERS", "IMAGES", "HELP", "LICENSE"] as const;
 
-export const Dashboard = ({ onError }: { onError: (message: string) => void }) => {
+export const Dashboard = () => {
   const [path, setPath] = useState<typeof menu[number]>("CONTAINERS");
   const handleSelectItem = (item: Widgets.BlessedElement) => {
     setPath(item.content as typeof menu[number]);
@@ -24,7 +24,7 @@ export const Dashboard = ({ onError }: { onError: (message: string) => void }) =
         onSelectItem={handleSelectItem}
         onSelect={handleSelect}
       />
-      <RouterView top={0} left={"12%"} path={path} onError={onError}></RouterView>
+      <RouterView top={0} left={"12%"} path={path}></RouterView>
     </>
   );
 };
@@ -58,13 +58,11 @@ const Sidebar = (
   );
 };
 
-const RouterView = (
-  props: Position & { path: typeof menu[number]; onError: (message: string) => void }
-) => {
+const RouterView = (props: Position & { path: typeof menu[number] }) => {
   const route = (path: typeof menu[number]) => {
     switch (path) {
       case "CONTAINERS":
-        return <ContainersPage onError={props.onError} />;
+        return <ContainersPage />;
       case "IMAGES":
         return (
           <box

@@ -29,34 +29,38 @@ export type Position = {
   height?: number | string;
 };
 
+export const displayMessage = (message: string, options?: { time?: number; color?: string }) => {
+  const MessageDialog = blessed.message({
+    parent: screen,
+    top: "center",
+    left: "center",
+    height: "16%",
+    width: "32%",
+    tags: true,
+    // @ts-ignore
+    border: { type: "line", fg: options?.color || "red" },
+  });
+
+  MessageDialog.on("press", () => screen.remove(MessageDialog));
+  MessageDialog.on("click", () => screen.remove(MessageDialog));
+  MessageDialog.focus();
+  MessageDialog.display(message, options?.time || 0, () => screen.remove(MessageDialog));
+
+  screen.render();
+};
+
 const App = () => {
   const [splashing, setSplashing] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
 
   const handleEnter = () => {
     setSplashing(false);
     screen.focusNext();
   };
-  const handleError = (message: string) => {
-    setErrorMessage(message);
-    setTimeout(() => setErrorMessage(""), 3000);
-  };
 
   return (
     <>
-      {splashing && <Splash onEnter={handleEnter} onError={handleError} />}
-      {!splashing && <Dashboard onError={handleError} />}
-
-      <message
-        hidden={!errorMessage}
-        content={errorMessage}
-        top="center"
-        left="center"
-        width="20%"
-        height="20%"
-        // @ts-ignore
-        border={{ type: "line", fg: "red" }}
-      ></message>
+      {splashing && <Splash onEnter={handleEnter} />}
+      {!splashing && <Dashboard />}
     </>
   );
 };

@@ -1,7 +1,7 @@
+import { spawn } from "child_process";
 import { client } from "../plugins/axios";
 import { access } from "../plugins/log";
 import { paths } from "./docker-engine-api-1.41";
-import { spawn } from "child_process";
 
 export const api = {
   // # Container
@@ -41,9 +41,42 @@ export const api = {
 
       const command = spawn("docker", args);
       command.stdout.setEncoding("utf8");
+      command.stderr.setEncoding("utf8");
 
       if (params.stdout) command.stdout.on("data", (chunk: string) => callback(chunk.toString()));
       if (params.stderr) command.stderr.on("data", (chunk: string) => callback(chunk.toString()));
+
+      return command;
+    },
+    stats: (
+      path: paths["/containers/{id}/stats"]["get"]["parameters"]["path"],
+      callback: (data: {
+        CPUPerc: string;
+        MemUsage: string;
+        BlockIO: string;
+        NetIO: string;
+      }) => void
+    ) => {
+      // yaml に型定義がないためコマンドでやる
+      access.debug(`/containers/${path.id}/stats`);
+
+      const args = ["stats"];
+      // たまに先頭に別の文字列がくっつくので頭にパイプラインを入れる(streamの何か？)
+      // 普通にコマンドから実行するとダブルクォーテーションが必要だけど、 child_process は不要らしい
+      // 例) `docker stats --format="|{{.CPUPerc}}|{{.MemUsage}}|{{.BlockIO}}|{{.NetIO}}"`
+      args.push("--format=|{{.CPUPerc}}|{{.MemUsage}}|{{.BlockIO}}|{{.NetIO}}");
+      args.push(path.id);
+
+      const command = spawn("docker", args);
+      command.stdout.setEncoding("utf8");
+
+      command.stdout.addListener("data", (chunk: string) => {
+        const line = chunk.toString().trim();
+        if ((line.match(/\|/g) || []).length === 4) {
+          const [_, CPUPerc, MemUsage, BlockIO, NetIO] = line.split("|");
+          callback({ CPUPerc, MemUsage, BlockIO, NetIO });
+        }
+      });
 
       return command;
     },

@@ -1,17 +1,17 @@
 import type { Widgets } from "blessed";
-import blessed from "blessed";
 import { useEffect, useRef, useState } from "react";
-import { screen } from "../app";
+import { displayMessage, screen } from "../app";
 import { api } from "../repositories/api";
 
 const ID_LENGTH = 12;
 
 // vue2 のコンポーネント-インスタンス-オプション順序-推奨 を真似る
 // https://jp.vuejs.org/v2/style-guide/#%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88-%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9-%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E9%A0%86%E5%BA%8F-%E6%8E%A8%E5%A5%A8
-export const ContainersPage = ({ onError }: { onError: (message: string) => void }) => {
+export const ContainersPage = () => {
   // + state
   const [container_id, setContainerId] = useState<string>("");
   // container_id が変わるたびに描画されるので、 selected を保持する必要がある (これは素のblessedより厄介)
+  // しかし、 start/stop すると refresh のせいか selected もリセットされちゃう
   const [selected, setSelected] = useState<number>(0);
   // useState と dataProps を使うやり方だと、
   // データセット時に on("select item") が呼ばれなかったため、 ref から直接操作する
@@ -102,15 +102,11 @@ export const ContainersPage = ({ onError }: { onError: (message: string) => void
         onSelect={handleSelect}
       ></listtable>
 
-      <line orientation="vertical" top={"24%"} left={0} height={1} width={"100%"}></line>
+      <line orientation="vertical" top={"24%"} left={0} height={1} width={"100%"} fg="grey"></line>
 
       {/* 豆知識 height, widthの指定を省略すると、「残りすべて」になる */}
       <box top={"25%"} left={0}>
-        <ContainerDetails
-          container_id={container_id}
-          onContainerUpdated={refreshContainers}
-          onError={onError}
-        />
+        <ContainerDetails container_id={container_id} onContainerUpdated={refreshContainers} />
       </box>
     </>
   );
@@ -119,11 +115,9 @@ export const ContainersPage = ({ onError }: { onError: (message: string) => void
 export const ContainerDetails = ({
   container_id,
   onContainerUpdated,
-  onError,
 }: {
   container_id: string;
   onContainerUpdated: () => void;
-  onError: (message: string) => void;
 }) => {
   // + state
   const [name, setName] = useState<string>("");
@@ -135,8 +129,6 @@ export const ContainerDetails = ({
   const [showJson, setShowJson] = useState<string>("");
 
   const [visibility, setVisibility] = useState<"LOGS" | "INSPECT" | "STATS">("LOGS");
-
-  const ref = useRef<Widgets.Log | null>(null);
 
   // vue でいう watch とか props っぽい
   useEffect(() => {
@@ -157,11 +149,6 @@ export const ContainerDetails = ({
       setNetworkJson(JSON.stringify(data.NetworkSettings, null, 3));
       setMountsJson(JSON.stringify(data.Mounts, null, 3));
     });
-
-    ref.current?.setContent(""); // ログは初期化
-    api.containers.logs({ id }, { follow: true, stdout: true, stderr: true, since: 0 }, (data) => {
-      ref.current?.log(data);
-    });
   };
 
   const handleMenuSelected = (content: string, key?: Widgets.Events.IKeyEventArg) => {
@@ -178,6 +165,8 @@ export const ContainerDetails = ({
       } else if (~content.indexOf("MOUNTS")) {
         setShowJson(mountsJson);
       }
+    } else if (~content.indexOf("STATS")) {
+      setVisibility("STATS");
     }
   };
 
@@ -195,14 +184,20 @@ export const ContainerDetails = ({
         onContainerUpdated();
       })
       .catch((error) => {
-        onError(error.data.message);
+        displayMessage(error.data.message);
       });
   };
 
   // + template
   return (
     <>
-      <text shrink tags top={0} left={1} content={name} />
+      <text
+        shrink
+        tags
+        top={0}
+        left={1}
+        content={`${status === "running" ? "{green-fg}" : "{blue-fg}"}${name}{/}`}
+      />
       <text
         shrink
         tags
@@ -211,7 +206,7 @@ export const ContainerDetails = ({
         content={`${status === "running" ? "{green-bg}" : "{blue-bg}"} {/} ${status}`}
       />
 
-      {["  LOGS  ", " CONFIG ", "NETWORK ", " MOUNTS "].map((content, i, array) => {
+      {["  LOGS  ", " CONFIG ", "NETWORK ", " MOUNTS ", " STATS  "].map((content, i, array) => {
         return (
           <button
             key={content}
@@ -249,16 +244,8 @@ export const ContainerDetails = ({
       />
 
       <box top={3} left={0}>
-        <log
-          ref={ref}
-          hidden={visibility !== "LOGS"}
-          keyable
-          mouse
-          keys
-          border={{ type: "line" }}
-          // @ts-ignore
-          style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
-        />
+        <LogsBox hidden={visibility !== "LOGS"} container_id={container_id}></LogsBox>
+        {/* スクロールがいい感じになるので、<log/> を使う */}
         <log
           hidden={visibility !== "INSPECT"}
           keyable
@@ -269,355 +256,115 @@ export const ContainerDetails = ({
           style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
           content={showJson}
         />
+        <StatsBox hidden={visibility !== "STATS"} container_id={container_id}></StatsBox>
       </box>
     </>
   );
 };
 
-/**
+export const LogsBox = ({ container_id, hidden }: { container_id: string; hidden: boolean }) => {
+  const ref = useRef<Widgets.Log | null>(null);
 
-Name
-State            START / STOP  REMOVE
-
-LOG  /  CONFIG  /  EXEC
-■■■■■■■■■■■■■
-■■■■■■■■■■■■
-■■■■■■■■■■■■■
-■■■■■■■■■■■■■■
-
- */
-export const attachDetails = (
-  screen: Widgets.Screen,
-  parent: Widgets.Node,
-  refreshList: () => void
-) => {
-  const details = blessed.box({
-    parent: parent,
-    top: "24%",
-    left: 0,
-    height: "76%",
-    width: "100%",
-  });
-
-  blessed.text({
-    parent: details,
-    left: 1,
-    top: 0,
-    tags: true,
-    content: "{green-bg} {/} {green-fg}DETAILS{/} {green-bg} {/}",
-  });
-
-  const header = blessed.box({
-    parent: details,
-    left: 0,
-    top: 1,
-    height: "16%",
-  });
-
-  const name = blessed.text({
-    parent: header,
-    shrink: true,
-    tags: true,
-    padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 0,
-    top: 1,
-    content: "",
-  });
-
-  const status = blessed.text({
-    parent: header,
-    shrink: true,
-    tags: true,
-    padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 32,
-    top: 1,
-    content: "",
-  });
-
-  const startButton = blessed.button({
-    parent: header,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    shrink: true,
-    padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 48,
-    top: 0,
-    content: "START",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const stopButton = blessed.button({
-    parent: header,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    shrink: true,
-    padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 56,
-    top: 0,
-    content: " STOP ",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-  startButton.hide();
-  stopButton.hide();
-
-  const logButton = blessed.button({
-    parent: header,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    shrink: true,
-    padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 0,
-    top: 3,
-    content: " LOG  ",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const configButton = blessed.button({
-    parent: header,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    shrink: true,
-    padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 9,
-    top: 3,
-    content: "CONFIG",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const networkButton = blessed.button({
-    parent: header,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    shrink: true,
-    padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 18,
-    top: 3,
-    content: "NETWORK",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const mountsButton = blessed.button({
-    parent: header,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    shrink: true,
-    padding: { left: 1, right: 1, top: 0, bottom: 0 },
-    left: 28,
-    top: 3,
-    content: "MOUNTS",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const main = blessed.box({
-    parent: details,
-    mouse: true,
-    keys: true,
-    left: 0,
-    top: "16%",
-    height: "86%",
-    width: "100%",
-  });
-
-  const logBlessed = blessed.log({
-    parent: main,
-    focusable: true,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    left: 0,
-    top: 0,
-    height: "100%",
-    width: "100%",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const configBlessed = blessed.log({
-    parent: main,
-    focusable: true,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    left: 0,
-    top: 0,
-    height: "100%",
-    width: "100%",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const networkBlessed = blessed.log({
-    parent: main,
-    focusable: true,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    left: 0,
-    top: 0,
-    height: "100%",
-    width: "100%",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const mountsBlessed = blessed.log({
-    parent: main,
-    focusable: true,
-    keyable: true,
-    mouse: true,
-    keys: true,
-    left: 0,
-    top: 0,
-    height: "100%",
-    width: "100%",
-    border: { type: "line" },
-    style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
-  });
-
-  const onEnter =
-    (params: { log?: boolean; config?: boolean; network?: boolean; mounts?: boolean }) => () => {
-      params.log ? logBlessed.show() : logBlessed.hide();
-      params.config ? configBlessed.show() : configBlessed.hide();
-      params.network ? networkBlessed.show() : networkBlessed.hide();
-      params.mounts ? mountsBlessed.show() : mountsBlessed.hide();
-      screen.render();
-    };
-
-  logButton.on("press", onEnter({ log: true }));
-  logButton.on("click", onEnter({ log: true }));
-  configButton.on("press", onEnter({ config: true }));
-  configButton.on("click", onEnter({ config: true }));
-  networkButton.on("press", onEnter({ network: true }));
-  networkButton.on("click", onEnter({ network: true }));
-  mountsButton.on("press", onEnter({ mounts: true }));
-  mountsButton.on("click", onEnter({ mounts: true }));
-
-  onEnter({ log: true })();
-
-  const start = (id: string) => () => {
-    api.containers
-      .start({ id })
-      .then(() => {
-        refresh(id);
-        refreshList();
-      })
-      .catch((error) => {
-        const message = blessed.message({
-          parent: parent,
-          top: "45%",
-          left: "40%",
-          height: "10%",
-          width: "20%",
-          mouse: true,
-          keys: true,
-          tags: true,
-          align: "center",
-          border: "line",
-          style: { border: { type: "line", fg: "red" } },
-        });
-        message.display(error.data.message, 3, () => ({}));
-        screen.render();
-      });
-  };
-
-  const stop = (id: string) => () => {
-    api.containers
-      .stop({ id })
-      .then(() => {
-        refresh(id);
-        refreshList();
-      })
-      .catch((error) => {
-        const message = blessed.message({
-          parent: parent,
-          top: "45%",
-          left: "40%",
-          height: "10%",
-          width: "20%",
-          mouse: true,
-          keys: true,
-          tags: true,
-          align: "center",
-          border: "line",
-          style: { border: { type: "line", fg: "red" } },
-        });
-        message.display(error.data.message, 3, () => ({}));
-        refreshList();
-        screen.render();
-      });
-  };
-
-  let onPressStartListener: null | ReturnType<typeof start> = null;
-  let onPressStopListener: null | ReturnType<typeof stop> = null;
-
-  const refresh = (id: string) => {
-    api.containers.inspect({ id }).then(({ data }) => {
-      name.setContent(`{bold}${data.Name ?? "unknown"}{/}`);
-
-      if (onPressStartListener) {
-        startButton.removeListener("press", onPressStartListener);
-        onPressStartListener = null;
-      }
-      if (onPressStopListener) {
-        stopButton.removeListener("press", onPressStopListener);
-        onPressStopListener = null;
-      }
-
-      const statusText = data.State?.Status;
-      if (statusText === "running") {
-        status.setContent(`{green-fg}${statusText}{/}`);
-
-        startButton.hide();
-
-        onPressStopListener = stop(id);
-        stopButton.on("press", onPressStopListener);
-        stopButton.show();
-      } else if (statusText === "exited") {
-        status.setContent(`{blue-fg}${statusText}{/}`);
-
-        onPressStartListener = start(id);
-        startButton.on("press", onPressStartListener);
-        startButton.show();
-
-        stopButton.hide();
-      } else {
-        status.setContent(statusText ?? "unknown");
-        startButton.hide();
-        stopButton.hide();
-      }
-
-      configBlessed.setContent(JSON.stringify(data.Config, null, 3));
-      networkBlessed.setContent(JSON.stringify(data.NetworkSettings, null, 3));
-      mountsBlessed.setContent(JSON.stringify(data.Mounts, null, 3));
-
-      screen.render();
-    });
-
-    logBlessed.setContent("");
-    api.containers.logs(
-      { id },
+  useEffect(() => {
+    ref.current?.setContent(""); // ログは初期化
+    const command = api.containers.logs(
+      { id: container_id },
       { follow: true, stdout: true, stderr: true, since: 0 },
-      (data: string) => {
-        logBlessed.log(data);
-        screen.render();
+      (data) => {
+        ref.current?.log(data);
       }
     );
-  };
 
-  return {
-    details,
-    refresh,
-  };
+    return () => {
+      command.kill(); // kill しないとリークする
+    };
+  }, [container_id]);
+
+  return (
+    <log
+      ref={ref}
+      hidden={hidden}
+      keyable
+      mouse
+      keys
+      border={{ type: "line" }}
+      // @ts-ignore
+      style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
+    />
+  );
+};
+
+export const StatsBox = ({ container_id, hidden }: { container_id: string; hidden: boolean }) => {
+  const [stats, setStats] = useState<{
+    CPUPerc: string;
+    MemUsage: string;
+    BlockIO: string;
+    NetIO: string;
+  }>({
+    CPUPerc: "",
+    MemUsage: "",
+    BlockIO: "",
+    NetIO: "",
+  });
+
+  // create 時 stream を取得する
+  // destory 時 stream を破棄する
+  useEffect(() => {
+    const command = api.containers.stats({ id: container_id }, (data) => {
+      setStats(data);
+    });
+
+    return () => {
+      command.kill(); // kill しないとリークする
+    };
+  }, [container_id]);
+
+  return (
+    <box hidden={hidden}>
+      <box
+        align="center"
+        valign="middle"
+        border={{ type: "line" }}
+        label={"CPU USAGE"}
+        top={0}
+        left={0}
+        height={"50%"}
+        width={"50%"}
+        content={stats.CPUPerc}
+      />
+      <box
+        align="center"
+        valign="middle"
+        border={{ type: "line" }}
+        label={"MEMORY USAGE"}
+        top={0}
+        left={"50%"}
+        height={"50%"}
+        // width={"50%"} 右側なので幅は残りすべて
+        content={stats.MemUsage}
+      />
+      <box
+        align="center"
+        valign="middle"
+        border={{ type: "line" }}
+        label={"DISK READ/WRITE"}
+        top={"50%"}
+        left={0}
+        // height={"50%"} // 下側なので高さは残りすべて
+        width={"50%"}
+        content={stats.BlockIO}
+      />
+      <box
+        align="center"
+        valign="middle"
+        border={{ type: "line" }}
+        label={"NETWORK I/O"}
+        top={"50%"}
+        left={"50%"}
+        // height={"50%"} // 下側なので高さは残りすべて
+        // width={"50%"} 右側なので幅は残りすべて
+        content={stats.NetIO}
+      />
+    </box>
+  );
 };
