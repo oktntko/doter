@@ -10,7 +10,6 @@ export const screen = blessed.screen({
   smartCSR: true,
   fullUnicode: true,
   dockBorders: true,
-  log: "logs/screen.log",
 });
 
 screen.key(["escape", "q", "C-[", "C-c"], () => process.exit(0));

@@ -55,21 +55,24 @@ Development is done with Docker installed directly on WSL, so I don't know how i
 
 ## Getting Started
 
-DOTER use [Docker Engine API](https://docs.docker.com/engine/api/#api-version-matrix) ver1.41, so you need Docker version 20.10.
+1. DOTER use [Docker Engine API](https://docs.docker.com/engine/api/#api-version-matrix) ver1.41, so you need Docker version 20.10.
 
-- Docker
+```sh
+❯ docker --version
+Docker version 20.10.12, build e91ed57
+```
 
-  ```sh
-  ❯ docker --version
-  Docker version 20.10.12, build e91ed57
-  ```
+2. Install from npm.
 
-Install from npm.
+```sh
+❯ npm i -g doter
+```
 
-- npm
-  ```sh
-  ❯ npm i -g doter
-  ```
+3. start
+
+```sh
+❯ doter
+```
 
 <!-- USAGE EXAMPLES -->
 
@@ -104,11 +107,12 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Project Link: [https://github.com/oktntko/doter](https://github.com/oktntko/doter)
+- [github](https://github.com/oktntko/doter)
+- [npm](https://www.npmjs.com/package/doter)
 
 <!-- ACKNOWLEDGEMENTS -->
 
 ## Acknowledgements
 
 - [Git Commit message Emoji](https://gist.github.com/parmentf/035de27d6ed1dce0b36a)
-- [Kubebox](https://github.com/astefanutti/kubebox)
+- [Best-README-Template](https://github.com/othneildrew/Best-README-Template)

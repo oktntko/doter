@@ -1,6 +1,5 @@
 import { spawn } from "child_process";
 import { client } from "~/plugins/axios";
-import { access } from "~/plugins/log";
 import { paths } from "~/repositories/docker-engine-api-1.41";
 
 export const api = {
@@ -8,7 +7,6 @@ export const api = {
   // : https://docs.docker.com/engine/api/v1.41/#tag/Container
   containers: {
     list: async (params: paths["/containers/json"]["get"]["parameters"]["query"] = {}) => {
-      access.debug("/containers/json");
       return client.get<paths["/containers/json"]["get"]["responses"]["200"]["schema"]>(
         "/containers/json",
         { params }
@@ -18,7 +16,6 @@ export const api = {
       path: paths["/containers/{id}/json"]["get"]["parameters"]["path"],
       params: paths["/containers/{id}/json"]["get"]["parameters"]["query"] = {}
     ) => {
-      access.debug(`/containers/${path.id}/json`);
       return client.get<paths["/containers/{id}/json"]["get"]["responses"]["200"]["schema"]>(
         `/containers/${path.id}/json`,
         { params }
@@ -30,7 +27,6 @@ export const api = {
       callback: (data: string) => void
     ) => {
       // {responseType: "stream"} の使い方がわからない
-      access.debug(`/containers/${path.id}/logs`);
 
       const args = ["logs"];
       if (params.follow) args.push("--follow");
@@ -58,7 +54,6 @@ export const api = {
       }) => void
     ) => {
       // yaml に型定義がないためコマンドでやる
-      access.debug(`/containers/${path.id}/stats`);
 
       const args = ["stats"];
       // たまに先頭に別の文字列がくっつくので頭にパイプラインを入れる(streamの何か？)
@@ -81,13 +76,11 @@ export const api = {
       return command;
     },
     start: async (path: paths["/containers/{id}/start"]["post"]["parameters"]["path"]) => {
-      access.debug(`/containers/${path.id}/start`);
       return client.post<paths["/containers/{id}/start"]["post"]["responses"]["204"]>(
         `/containers/${path.id}/start`
       );
     },
     stop: async (path: paths["/containers/{id}/stop"]["post"]["parameters"]["path"]) => {
-      access.debug(`/containers/${path.id}/stop`);
       return client.post<paths["/containers/{id}/stop"]["post"]["responses"]["204"]>(
         `/containers/${path.id}/stop`
       );
@@ -96,20 +89,17 @@ export const api = {
 
   images: {
     list: async (params: paths["/images/json"]["get"]["parameters"]["query"] = {}) => {
-      access.debug("/images/json");
       return client.get<paths["/images/json"]["get"]["responses"]["200"]["schema"]>(
         "/images/json",
         { params }
       );
     },
     history: async (path: paths["/images/{name}/history"]["get"]["parameters"]["path"]) => {
-      access.debug(`/images/${path.name}/history`);
       return client.get<paths["/images/{name}/history"]["get"]["responses"]["200"]["schema"]>(
         `/images/${path.name}/history`
       );
     },
     inspect: async (path: paths["/images/{name}/json"]["get"]["parameters"]["path"]) => {
-      access.debug(`/images/${path.name}/json`);
       return client.get<paths["/images/{name}/json"]["get"]["responses"]["200"]["schema"]>(
         `/images/${path.name}/json`
       );

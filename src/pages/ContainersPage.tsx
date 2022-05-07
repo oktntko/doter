@@ -1,15 +1,48 @@
 import type { Widgets } from "blessed";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  ForwardRefRenderFunction,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { displayMessage, screen } from "~/app";
 import { api } from "~/repositories/api";
 
 const ID_LENGTH = 12;
 
+export const ContainersPage = () => {
+  const [container_id, setContainerId] = useState<string>("");
+  const ref = useRef<{ refreshContainers: () => void } | null>(null);
+
+  const handleContainerUpdated = () => {
+    ref.current?.refreshContainers();
+  };
+
+  return (
+    <>
+      <box top={0} left={0} height={"24%"} width={"100%"}>
+        <ContainerList ref={ref} setContainerId={setContainerId} />
+      </box>
+
+      <line orientation="vertical" top={"24%"} left={0} height={1} width={"100%"} fg="grey"></line>
+
+      {/* 豆知識 height, widthの指定を省略すると、「残りすべて」になる */}
+      <box top={"25%"} left={0}>
+        <ContainerDetails container_id={container_id} onContainerUpdated={handleContainerUpdated} />
+      </box>
+    </>
+  );
+};
+
 // vue2 のコンポーネント-インスタンス-オプション順序-推奨 を真似る
 // https://jp.vuejs.org/v2/style-guide/#%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88-%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9-%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E9%A0%86%E5%BA%8F-%E6%8E%A8%E5%A5%A8
-export const ContainersPage = () => {
+const ContainerListFunction: ForwardRefRenderFunction<
+  { refreshContainers: () => void },
+  { setContainerId: React.Dispatch<React.SetStateAction<string>> }
+> = ({ setContainerId }, injectref) => {
   // + state
-  const [container_id, setContainerId] = useState<string>("");
   // container_id が変わるたびに描画されるので、 selected を保持する必要がある (これは素のblessedより厄介)
   // しかし、 start/stop すると refresh のせいか selected もリセットされちゃう
   const [selected, setSelected] = useState<number>(0);
@@ -20,6 +53,10 @@ export const ContainersPage = () => {
    * data={containers}
    */
   const ref = useRef<Widgets.ListTableElement | null>(null);
+
+  useImperativeHandle(injectref, () => ({
+    refreshContainers,
+  }));
 
   // + lifecycle
   useEffect(() => {
@@ -75,44 +112,36 @@ export const ContainersPage = () => {
 
   // + template
   return (
-    <>
-      <listtable
-        ref={ref}
-        keyable
-        mouse
-        keys
-        tags
-        top={0}
-        left={0}
-        height={"24%"}
-        width={"100%"}
-        border={{ type: "line" }}
-        style={{
-          header: { fg: "green" },
-          // @ts-ignore
-          focus: { border: { fg: "yellow" } },
-          // @ts-ignore
-          hover: { border: { fg: "blue" } },
-        }}
-        selectedFg={"black"}
-        selectedBg={"white"}
-        align={"left"}
-        selected={selected}
-        onSelectItem={handleSelectItem}
-        onSelect={handleSelect}
-      ></listtable>
-
-      <line orientation="vertical" top={"24%"} left={0} height={1} width={"100%"} fg="grey"></line>
-
-      {/* 豆知識 height, widthの指定を省略すると、「残りすべて」になる */}
-      <box top={"25%"} left={0}>
-        <ContainerDetails container_id={container_id} onContainerUpdated={refreshContainers} />
-      </box>
-    </>
+    <listtable
+      ref={ref}
+      keyable
+      mouse
+      keys
+      tags
+      top={0}
+      left={0}
+      height={"100%"}
+      width={"100%"}
+      border={{ type: "line" }}
+      style={{
+        header: { fg: "green" },
+        // @ts-ignore
+        focus: { border: { fg: "yellow" } },
+        // @ts-ignore
+        hover: { border: { fg: "blue" } },
+      }}
+      selectedFg={"black"}
+      selectedBg={"white"}
+      align={"left"}
+      selected={selected}
+      onSelectItem={handleSelectItem}
+      onSelect={handleSelect}
+    />
   );
 };
+const ContainerList = forwardRef(ContainerListFunction);
 
-export const ContainerDetails = ({
+const ContainerDetails = ({
   container_id,
   onContainerUpdated,
 }: {
@@ -126,7 +155,7 @@ export const ContainerDetails = ({
   const [configJson, setConfigJson] = useState<string>("");
   const [networkJson, setNetworkJson] = useState<string>("");
   const [mountsJson, setMountsJson] = useState<string>("");
-  const [showJson, setShowJson] = useState<string>("");
+  const [inspectContent, setInspectContent] = useState<string>("");
 
   const [visibility, setVisibility] = useState<"LOGS" | "INSPECT" | "STATS">("LOGS");
 
@@ -159,11 +188,11 @@ export const ContainerDetails = ({
     } else if (["CONFIG", "NETWORK", "MOUNTS"].some((label) => ~content.indexOf(label))) {
       setVisibility("INSPECT");
       if (~content.indexOf("CONFIG")) {
-        setShowJson(configJson);
+        setInspectContent(configJson);
       } else if (~content.indexOf("NETWORK")) {
-        setShowJson(networkJson);
+        setInspectContent(networkJson);
       } else if (~content.indexOf("MOUNTS")) {
-        setShowJson(mountsJson);
+        setInspectContent(mountsJson);
       }
     } else if (~content.indexOf("STATS")) {
       setVisibility("STATS");
@@ -246,25 +275,15 @@ export const ContainerDetails = ({
       />
 
       <box top={3} left={0}>
-        <LogsBox hidden={visibility !== "LOGS"} container_id={container_id}></LogsBox>
-        {/* スクロールがいい感じになるので、<log/> を使う */}
-        <log
-          hidden={visibility !== "INSPECT"}
-          keyable
-          mouse
-          keys
-          border={{ type: "line" }}
-          // @ts-ignore
-          style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
-          content={showJson}
-        />
-        <StatsBox hidden={visibility !== "STATS"} container_id={container_id}></StatsBox>
+        {visibility === "LOGS" && <LogsBox container_id={container_id} />}
+        {visibility === "INSPECT" && <InspectBox content={inspectContent} />}
+        {visibility === "STATS" && <StatsBox container_id={container_id} />}
       </box>
     </>
   );
 };
 
-export const LogsBox = ({ container_id, hidden }: { container_id: string; hidden: boolean }) => {
+const LogsBox = ({ container_id }: { container_id: string }) => {
   const ref = useRef<Widgets.Log | null>(null);
 
   useEffect(() => {
@@ -285,7 +304,6 @@ export const LogsBox = ({ container_id, hidden }: { container_id: string; hidden
   return (
     <log
       ref={ref}
-      hidden={hidden}
       keyable
       mouse
       keys
@@ -296,7 +314,21 @@ export const LogsBox = ({ container_id, hidden }: { container_id: string; hidden
   );
 };
 
-export const StatsBox = ({ container_id, hidden }: { container_id: string; hidden: boolean }) => {
+const InspectBox = ({ content }: { content: string }) => {
+  return (
+    <log
+      keyable
+      mouse
+      keys
+      border={{ type: "line" }}
+      // @ts-ignore
+      style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
+      content={content}
+    />
+  );
+};
+
+const StatsBox = ({ container_id }: { container_id: string }) => {
   const [stats, setStats] = useState<{
     CPUPerc: string;
     MemUsage: string;
@@ -322,7 +354,7 @@ export const StatsBox = ({ container_id, hidden }: { container_id: string; hidde
   }, [container_id]);
 
   return (
-    <box hidden={hidden}>
+    <>
       <box
         align="center"
         valign="middle"
@@ -367,6 +399,6 @@ export const StatsBox = ({ container_id, hidden }: { container_id: string; hidde
         // width={"50%"} 右側なので幅は残りすべて
         content={stats.NetIO}
       />
-    </box>
+    </>
   );
 };

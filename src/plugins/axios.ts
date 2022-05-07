@@ -1,5 +1,4 @@
 import axios from "axios";
-import { access } from "~/plugins/log";
 
 export const client = axios.create();
 
@@ -8,14 +7,3 @@ client.interceptors.request.use((config) => {
   config.baseURL = `http:/${process.env.API_VERSION || "v1.41"}`;
   return config;
 });
-
-client.interceptors.response.use(
-  (response) => {
-    access.debug(response.data);
-    return Promise.resolve(response);
-  },
-  (error) => {
-    access.error(error);
-    return Promise.reject(error.response);
-  }
-);

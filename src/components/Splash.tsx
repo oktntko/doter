@@ -1,13 +1,11 @@
 import { exec } from "child_process";
 import React, { useEffect } from "react";
 import { displayMessage } from "~/app";
-import log from "~/plugins/log";
 
 export const Splash = (props: { onEnter: () => void }) => {
   useEffect(() => {
     exec(/*shell*/ "service docker status", (error, stdout) => {
       if (error) {
-        log.error(error);
         displayMessage(stdout);
       } else {
         props.onEnter();
