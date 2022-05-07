@@ -29,6 +29,7 @@
   "dependencies": {
     "axios": "^0.27.2",
     "blessed": "^0.1.81",
+    "blessed-xterm": "^1.4.2",
     "dayjs": "^1.11.1",
     "react": "^17.0.2",
     "react-blessed": "^0.7.2"

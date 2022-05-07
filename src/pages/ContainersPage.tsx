@@ -1,4 +1,5 @@
 import type { Widgets } from "blessed";
+import xterm from "blessed-xterm";
 import React, {
   forwardRef,
   ForwardRefRenderFunction,
@@ -157,7 +158,7 @@ const ContainerDetails = ({
   const [mountsJson, setMountsJson] = useState<string>("");
   const [inspectContent, setInspectContent] = useState<string>("");
 
-  const [visibility, setVisibility] = useState<"LOGS" | "INSPECT" | "STATS">("LOGS");
+  const [visibility, setVisibility] = useState<"LOGS" | "INSPECT" | "STATS" | "EXEC">("LOGS");
 
   // vue でいう watch とか props っぽい
   useEffect(() => {
@@ -196,6 +197,8 @@ const ContainerDetails = ({
       }
     } else if (~content.indexOf("STATS")) {
       setVisibility("STATS");
+    } else if (~content.indexOf("EXEC")) {
+      setVisibility("EXEC");
     }
   };
 
@@ -235,27 +238,29 @@ const ContainerDetails = ({
         content={`${status === "running" ? "{green-bg}" : "{blue-bg}"} {/} ${status}`}
       />
 
-      {["  LOGS  ", " CONFIG ", "NETWORK ", " MOUNTS ", " STATS  "].map((content, i, array) => {
-        return (
-          <button
-            key={content}
-            keyable
-            mouse
-            keys
-            shrink
-            top={1}
-            right={(array.length - i) * 11 + 2}
-            padding={{ left: 1, right: 1, top: 0, bottom: 0 }}
-            border={{ type: "line" }}
-            // @ts-ignore
-            style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
-            content={content}
-            onClick={() => handleMenuSelected(content)}
-            // eslint-disable-next-line react/no-unknown-property
-            onKeypress={(_, key) => handleMenuSelected(content, key)}
-          />
-        );
-      })}
+      {["  LOGS  ", " CONFIG ", "NETWORK ", " MOUNTS ", " STATS  ", "  EXEC  "].map(
+        (content, i, array) => {
+          return (
+            <button
+              key={content}
+              keyable
+              mouse
+              keys
+              shrink
+              top={1}
+              right={(array.length - i) * 11 + 2}
+              padding={{ left: 1, right: 1, top: 0, bottom: 0 }}
+              border={{ type: "line" }}
+              // @ts-ignore
+              style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
+              content={content}
+              onClick={() => handleMenuSelected(content)}
+              // eslint-disable-next-line react/no-unknown-property
+              onKeypress={(_, key) => handleMenuSelected(content, key)}
+            />
+          );
+        }
+      )}
 
       <button
         keyable
@@ -278,6 +283,7 @@ const ContainerDetails = ({
         {visibility === "LOGS" && <LogsBox container_id={container_id} />}
         {visibility === "INSPECT" && <InspectBox content={inspectContent} />}
         {visibility === "STATS" && <StatsBox container_id={container_id} />}
+        {visibility === "EXEC" && <ExecBox container_id={container_id} />}
       </box>
     </>
   );
@@ -401,4 +407,40 @@ const StatsBox = ({ container_id }: { container_id: string }) => {
       />
     </>
   );
+};
+
+const ExecBox = ({ container_id }: { container_id: string }) => {
+  const ref = useRef<Widgets.BoxElement | null>(null);
+
+  useEffect(() => {
+    const term = new xterm({
+      parent: ref.current,
+      shell: "sh",
+      // ! sh がなかったら入れない。入ったら bash に切り替える
+      // eval 'if type bash > /dev/null 2>&1; then bash; else sh; fi' でやってみたら
+      // starting container process caused: exec: "eval": executable file not found in $PATH: unknown でした
+      // bash にするとタブキーを受け取っているっぽくて、候補がでるので総じて sh でよい
+      args: ["-c", `docker exec -it ${container_id} sh`],
+      env: process.env,
+      cwd: process.cwd(),
+      scrollback: 1000, // scroll は Logにすればできるが、上キーで最後のコマンドじゃなくてスクロールしてしまう。それをさておいても一度スクロールするとキー入力ができなくなる
+      keyable: true,
+      mouse: true,
+      keys: true,
+      border: { type: "line" },
+      style: { focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } },
+      left: 0,
+      top: 0,
+      width: "100%",
+      height: "100%",
+    });
+
+    return () => {
+      term.kill();
+      term.removeListeners();
+      ref.current?.remove(term);
+    };
+  }, [container_id]);
+
+  return <box ref={ref} mouse keys height={"100%"} width={"100%"} />;
 };

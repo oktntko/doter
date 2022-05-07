@@ -1,4 +1,3 @@
-import type { Widgets } from "blessed";
 import blessed from "blessed";
 import React, { useState } from "react";
 import { render } from "react-blessed";
@@ -13,13 +12,8 @@ export const screen = blessed.screen({
 });
 
 screen.key(["escape", "q", "C-[", "C-c"], () => process.exit(0));
-screen.on("keypress", (_: string, key: Widgets.Events.IKeyEventArg) => {
-  if (key.full === "tab") {
-    screen.focusNext();
-  } else if (key.full === "S-tab") {
-    screen.focusPrevious();
-  }
-});
+screen.key("tab", () => screen.focusNext());
+screen.key("S-tab", () => screen.focusPrevious());
 
 export type Position = {
   top?: number | string;
