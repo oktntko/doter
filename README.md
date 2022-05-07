@@ -88,10 +88,6 @@ Docker version 20.10.12, build e91ed57
 
 - Feature
   - [ ] Move the focus with the cross key.
-  - [ ] Execute `docker exec -it" container id "/ bin / bash` in` blessed`.
-    - I gave up on `blessed.terminal` because` pty.js` could not be installed.
-    - I didn't know how to use `xterm-headless`.
-    - When I put `stdin / stdout` to` input / output` of `blessed.screen` with `child_process.spawn (,, {stdio: "inherit"})`, it works but it breaks.
   - [ ] Jump from Image to Container.
   - [ ] Put a cleanup command like `prune` somewhere.
 - Refactoring
