@@ -45,7 +45,7 @@
 
 ## About The Project
 
-https://user-images.githubusercontent.com/72344657/166904227-ed0db615-dd6d-4415-ad30-b2d5da84c172.mp4
+https://user-images.githubusercontent.com/72344657/167260211-dc6fe4cb-0af6-483e-b95e-a3c1b3a5912c.mp4
 
 I want to Docker Desktop in the terminal as well!  
 This is a TUI tool that allows you to interact with Docker on your terminal.  
