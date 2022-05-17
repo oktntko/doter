@@ -1,6 +1,6 @@
 {
   "name": "doter",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "I want to Docker Desktop even with Terminal!",
   "main": "dist/app.js",
   "bin": {
