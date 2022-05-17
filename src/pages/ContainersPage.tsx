@@ -158,7 +158,9 @@ const ContainerDetails = ({
   const [mountsJson, setMountsJson] = useState<string>("");
   const [inspectContent, setInspectContent] = useState<string>("");
 
-  const [visibility, setVisibility] = useState<"LOGS" | "INSPECT" | "STATS" | "EXEC">("LOGS");
+  const [visibility, setVisibility] = useState<
+    "LOGS" | "CONFIG" | "NETWORK" | "MOUNTS" | "STATS" | "EXEC"
+  >("LOGS");
 
   // vue でいう watch とか props っぽい
   useEffect(() => {
@@ -186,15 +188,15 @@ const ContainerDetails = ({
 
     if (~content.indexOf("LOGS")) {
       setVisibility("LOGS");
-    } else if (["CONFIG", "NETWORK", "MOUNTS"].some((label) => ~content.indexOf(label))) {
-      setVisibility("INSPECT");
-      if (~content.indexOf("CONFIG")) {
-        setInspectContent(configJson);
-      } else if (~content.indexOf("NETWORK")) {
-        setInspectContent(networkJson);
-      } else if (~content.indexOf("MOUNTS")) {
-        setInspectContent(mountsJson);
-      }
+    } else if (~content.indexOf("CONFIG")) {
+      setVisibility("CONFIG");
+      setInspectContent(configJson);
+    } else if (~content.indexOf("NETWORK")) {
+      setVisibility("NETWORK");
+      setInspectContent(networkJson);
+    } else if (~content.indexOf("MOUNTS")) {
+      setVisibility("MOUNTS");
+      setInspectContent(mountsJson);
     } else if (~content.indexOf("STATS")) {
       setVisibility("STATS");
     } else if (~content.indexOf("EXEC")) {
@@ -240,6 +242,7 @@ const ContainerDetails = ({
 
       {["  LOGS  ", " CONFIG ", "NETWORK ", " MOUNTS ", " STATS  ", "  EXEC  "].map(
         (content, i, array) => {
+          const bg = ~content.indexOf(visibility) ? "grey" : "black";
           return (
             <button
               key={content}
@@ -251,8 +254,13 @@ const ContainerDetails = ({
               right={(array.length - i) * 11 + 2}
               padding={{ left: 1, right: 1, top: 0, bottom: 0 }}
               border={{ type: "line" }}
-              // @ts-ignore
-              style={{ focus: { border: { fg: "yellow" } }, hover: { border: { fg: "blue" } } }}
+              style={{
+                bg,
+                // @ts-ignore
+                focus: { border: { fg: "yellow" } },
+                // @ts-ignore
+                hover: { border: { fg: "blue" } },
+              }}
               content={content}
               onClick={() => handleMenuSelected(content)}
               // eslint-disable-next-line react/no-unknown-property
@@ -281,7 +289,9 @@ const ContainerDetails = ({
 
       <box top={3} left={0}>
         {visibility === "LOGS" && <LogsBox container_id={container_id} />}
-        {visibility === "INSPECT" && <InspectBox content={inspectContent} />}
+        {(visibility === "CONFIG" || visibility === "NETWORK" || visibility === "MOUNTS") && (
+          <InspectBox content={inspectContent} />
+        )}
         {visibility === "STATS" && <StatsBox container_id={container_id} />}
         {visibility === "EXEC" && <ExecBox container_id={container_id} />}
       </box>
