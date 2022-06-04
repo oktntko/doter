@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { displayMessage, screen } from "~/app";
+import { displayMessage, focusNext, processExit, screen } from "~/app";
 import { api } from "~/repositories/api";
 
 const ID_LENGTH = 12;
@@ -443,6 +443,18 @@ const ExecBox = ({ container_id }: { container_id: string }) => {
       top: 0,
       width: "100%",
       height: "100%",
+    });
+
+    term.on("focus", () => {
+      screen.unkey("C-c", processExit);
+      screen.unkey("q", processExit);
+      screen.unkey("tab", focusNext);
+    });
+
+    term.on("blur", () => {
+      screen.key("C-c", processExit);
+      screen.key("q", processExit);
+      screen.key("tab", focusNext);
     });
 
     return () => {

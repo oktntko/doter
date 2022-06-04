@@ -11,8 +11,10 @@ export const screen = blessed.screen({
   dockBorders: true,
 });
 
-screen.key(["escape", "q", "C-[", "C-c"], () => process.exit(0));
-screen.key("tab", () => screen.focusNext());
+export const processExit = () => process.exit(0);
+export const focusNext = () => screen.focusNext();
+screen.key(["escape", "q", "C-[", "C-c"], processExit);
+screen.key("tab", focusNext);
 screen.key("S-tab", () => screen.focusPrevious());
 
 export type Position = {
