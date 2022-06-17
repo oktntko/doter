@@ -41,8 +41,12 @@ export const ContainersPage = () => {
 // https://jp.vuejs.org/v2/style-guide/#%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88-%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9-%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E9%A0%86%E5%BA%8F-%E6%8E%A8%E5%A5%A8
 const ContainerListFunction: ForwardRefRenderFunction<
   { refreshContainers: () => void },
-  { setContainerId: React.Dispatch<React.SetStateAction<string>> }
-> = ({ setContainerId }, injectref) => {
+  {
+    setContainerId?: React.Dispatch<React.SetStateAction<string>>;
+    network?: string;
+    volume?: string;
+  }
+> = ({ setContainerId, network, volume }, injectref) => {
   // + state
   // container_id が変わるたびに描画されるので、 selected を保持する必要がある (これは素のblessedより厄介)
   // しかし、 start/stop すると refresh のせいか selected もリセットされちゃう
@@ -62,51 +66,60 @@ const ContainerListFunction: ForwardRefRenderFunction<
   // + lifecycle
   useEffect(() => {
     refreshContainers();
-  }, []);
+  }, [network, volume]);
 
   // + methods
   const refreshContainers = () => {
-    api.containers.list({ all: true }).then(({ data }) => {
-      const headers = [
-        "CONTAINER ID",
-        "NAMES",
-        "STATE",
-        "PORTS",
-        "IMAGE",
-        "PROJECT",
-        "WORKING_DIR",
-      ];
-      const containers = data.map((container) => [
-        container.Id?.substring(0, ID_LENGTH) ?? "",
-        container.Names?.join(" ") ?? "",
-        `${
-          container.State === "running"
-            ? "{green-fg}"
-            : container.State === "exited"
-            ? "{blue-fg}"
-            : "{white-fg}"
-        }${container.State ?? "unknown"}{/}`,
-        container.Ports?.map(
-          (port) =>
-            `${port.IP && port.PublicPort ? `${port.IP}:${port.PublicPort}->` : ""}${
-              port.PrivatePort
-            }/${port.Type}`
-        )
-          .join(" ")
-          .substring(0, 24) || "",
-        container.Image?.substring(0, 32) ?? "",
-        container.Labels?.["com.docker.compose.project"] ?? "",
-        container.Labels?.["com.docker.compose.project.working_dir"] ?? "",
-      ]);
+    api.containers
+      .list({
+        all: true,
+        filters: {
+          network: network ? [network] : undefined,
+          volume: volume ? [volume] : undefined,
+        },
+      })
+      .then(({ data }) => {
+        const headers = [
+          "CONTAINER ID",
+          "NAMES",
+          "STATE",
+          "PORTS",
+          "IMAGE",
+          "PROJECT",
+          "WORKING_DIR",
+        ];
+        const containers = data.map((container) => [
+          container.Id?.substring(0, ID_LENGTH) ?? "",
+          container.Names?.join(" ") ?? "",
+          `${
+            container.State === "running"
+              ? "{green-fg}"
+              : container.State === "exited"
+              ? "{blue-fg}"
+              : "{white-fg}"
+          }${container.State ?? "unknown"}{/}`,
+          container.Ports?.map(
+            (port) =>
+              `${port.IP && port.PublicPort ? `${port.IP}:${port.PublicPort}->` : ""}${
+                port.PrivatePort
+              }/${port.Type}`
+          )
+            .join(" ")
+            .substring(0, 24) || "",
+          container.Image?.substring(0, 32) ?? "",
+          container.Labels?.["com.docker.compose.project"] ?? "",
+          container.Labels?.["com.docker.compose.project.working_dir"] ?? "",
+        ]);
 
-      ref.current?.setData([headers, ...containers]);
-    });
+        ref.current?.setData([headers, ...containers]);
+      });
   };
 
   const handleSelectItem = (item: Widgets.BlessedElement, i: number) => {
     setSelected(i);
-    setContainerId(item.content.substring(0, ID_LENGTH));
+    setContainerId?.(item.content.substring(0, ID_LENGTH));
   };
+
   const handleSelect = () => {
     screen.focusNext();
   };
@@ -140,7 +153,7 @@ const ContainerListFunction: ForwardRefRenderFunction<
     />
   );
 };
-const ContainerList = forwardRef(ContainerListFunction);
+export const ContainerList = forwardRef(ContainerListFunction);
 
 const ContainerDetails = ({
   container_id,

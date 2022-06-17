@@ -4734,7 +4734,7 @@ export interface operations {
          * - `status=`(`created`|`restarting`|`running`|`removing`|`paused`|`exited`|`dead`)
          * - `volume`=(`<volume name>` or `<mount point destination>`)
          */
-        filters?: string;
+        filters?: Record<string, string[] | undefined>;
       };
     };
     responses: {

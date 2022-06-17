@@ -105,4 +105,30 @@ export const api = {
       );
     },
   },
+
+  networks: {
+    list: async (params: paths["/networks"]["get"]["parameters"]["query"] = {}) => {
+      return client.get<paths["/networks"]["get"]["responses"]["200"]["schema"]>("/networks", {
+        params,
+      });
+    },
+    inspect: async (path: paths["/networks/{id}"]["get"]["parameters"]["path"]) => {
+      return client.get<paths["/networks/{id}"]["get"]["responses"]["200"]["schema"]>(
+        `/networks/${path.id}`
+      );
+    },
+  },
+
+  volumes: {
+    list: async (params: paths["/volumes"]["get"]["parameters"]["query"] = {}) => {
+      return client.get<paths["/volumes"]["get"]["responses"]["200"]["schema"]>("/volumes", {
+        params,
+      });
+    },
+    inspect: async (path: paths["/volumes/{name}"]["get"]["parameters"]["path"]) => {
+      return client.get<paths["/volumes/{name}"]["get"]["responses"]["200"]["schema"]>(
+        `/volumes/${path.name}`
+      );
+    },
+  },
 };
