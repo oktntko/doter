@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { displayMessage } from "~/app";
 
 export const Splash = (props: { onEnter: () => void }) => {

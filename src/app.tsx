@@ -1,5 +1,5 @@
 import blessed from "blessed";
-import React, { useState } from "react";
+import { useState } from "react";
 import { render } from "react-blessed";
 import { Splash } from "~/components/Splash";
 import { Dashboard } from "~/layouts/Dashboard";

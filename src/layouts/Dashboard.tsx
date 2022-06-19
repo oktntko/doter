@@ -1,5 +1,5 @@
 import type { Widgets } from "blessed";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Position, screen } from "~/app";
 import { ContainersPage } from "~/pages/ContainersPage";
 import { HelpPage } from "~/pages/HelpPage";

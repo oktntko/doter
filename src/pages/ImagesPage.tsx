@@ -1,5 +1,5 @@
 import type { Widgets } from "blessed";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { screen } from "~/app";
 import dayjs from "~/plugins/dayjs";
 import { api } from "~/repositories/api";

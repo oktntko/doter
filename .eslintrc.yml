@@ -23,6 +23,7 @@ rules:
       varsIgnorePattern: "^_"
       caughtErrorsIgnorePattern: "^_"
   "@typescript-eslint/ban-ts-comment": "off"
+  "react/react-in-jsx-scope": "off"
 settings:
   react:
     version: "detect"
