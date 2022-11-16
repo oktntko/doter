@@ -4,9 +4,15 @@ import { displayMessage } from "~/app";
 
 export const Splash = (props: { onEnter: () => void }) => {
   useEffect(() => {
-    exec(/*shell*/ "service docker status", (error, stdout) => {
+    exec(/*shell*/ "service docker status", (error, serviceStdout) => {
       if (error) {
-        displayMessage(stdout);
+        exec(/*shell*/ "systemctl status docker", (error, systemctlStdout) => {
+          if (error) {
+            displayMessage(serviceStdout ? serviceStdout : systemctlStdout);
+          } else {
+            props.onEnter();
+          }
+        });
       } else {
         props.onEnter();
       }

@@ -27,27 +27,27 @@
   "license": "MIT",
   "repository": "oktntko/doter",
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^1.1.3",
     "blessed": "^0.1.81",
     "blessed-xterm": "git+https://github.com/oktntko/blessed-xterm.git",
-    "dayjs": "^1.11.1",
+    "dayjs": "^1.11.6",
     "react": "^17.0.2",
     "react-blessed": "^0.7.2"
   },
   "devDependencies": {
-    "@swc/core": "^1.2.177",
+    "@swc/core": "^1.3.17",
     "@types/blessed": "^0.1.19",
-    "@types/react-blessed": "^0.7.1",
-    "@typescript-eslint/eslint-plugin": "^5.28.0",
-    "@typescript-eslint/parser": "^5.28.0",
+    "@types/react-blessed": "^0.7.2",
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "@typescript-eslint/parser": "^5.43.0",
     "@vitejs/plugin-react": "^1.3.2",
-    "eslint": "^8.18.0",
+    "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-react": "^7.29.4",
-    "openapi-typescript": "^5.2.0",
-    "prettier": "^2.6.2",
-    "vite": "^2.9.8",
-    "vite-plugin-node": "^0.0.19"
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.31.10",
+    "openapi-typescript": "^6.0.3",
+    "prettier": "^2.7.1",
+    "vite": "^2.9.15",
+    "vite-plugin-node": "^1.0.0"
   }
 }
