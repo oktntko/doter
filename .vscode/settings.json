@@ -30,21 +30,28 @@
   "[markdown]": {
     "files.trimTrailingWhitespace": false
   },
+  "python.formatting.provider": "autopep8",
+  "python.formatting.autopep8Args": ["--aggressive", "--aggressive"],
+  "python.languageServer": "Pylance",
+  "python.linting.flake8Enabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.linting.pylintEnabled": false,
   "javascript.format.enable": false,
   "typescript.format.enable": false,
   "editor.formatOnSave": true,
-  "editor.rulers": [100],
+  "editor.rulers": [80],
+  "editor.tabSize": 4,
   "files.encoding": "utf8",
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "prettier.endOfLine": "lf",
-  "prettier.printWidth": 100,
+  "prettier.printWidth": 80,
   "prettier.semi": true,
   "prettier.singleQuote": false,
   "better-comments.tags": [
     {
-      "tag": "#", // white 見出し
+      "tag": "#", // 見出し
       "color": "#f92672",
       "bold": true
     },
