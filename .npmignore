@@ -1,7 +1,0 @@
-.eslintrc.yml
-.github
-.vscode
-assets
-src
-tsconfig.json
-vite.config.ts
