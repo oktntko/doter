@@ -51,7 +51,7 @@
   "prettier.singleQuote": false,
   "better-comments.tags": [
     {
-      "tag": "#", // 見出し
+      "tag": "*", // 見出し
       "color": "#f92672",
       "bold": true
     },
