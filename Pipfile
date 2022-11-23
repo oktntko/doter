@@ -9,6 +9,7 @@ log = "textual console"
 
 [packages]
 textual = {extras = ["dev"], version = "*"}
+docker = "*"
 
 [dev-packages]
 autopep8 = "*"

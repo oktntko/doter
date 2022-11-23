@@ -1,0 +1,85 @@
+Sidebar {
+  dock: left;
+  width: 16;
+  height: 100%;
+}
+
+Sidebar.-hidden {
+  display: none;
+}
+
+ContainersScreen {
+  layout: vertical;
+}
+
+DockerContainerCard {
+  border-top: tall gray;
+  border-left: tall gray;
+  border-right: tall gray;
+  border-bottom: tall gray;
+  height: 5;
+  layout: grid;
+  grid-size: 3;
+  grid-columns: 1fr 5fr 5fr;
+  grid-gutter: 1;
+  padding: 0 1;
+}
+DockerContainerCard Button {
+  text-align: left;
+  border: none;
+  height: 1;
+  background: black;
+}
+DockerContainerCard Button:hover,
+DockerContainerCard Button:focus {
+  background: blue;
+}
+
+DockerContainerCard .status {
+  align-vertical: middle;
+  height: 100%;
+  border-right: solid;
+}
+DockerContainerCard .status .restarting {
+  color: gray;
+}
+DockerContainerCard .status .running {
+  color: green;
+}
+DockerContainerCard .status .paused {
+  color: gray;
+}
+DockerContainerCard .status .exited {
+  color: gray;
+}
+
+DockerContainerCard .base {
+  height: 100%;
+  border-right: solid;
+}
+DockerContainerCard .base Div {
+  height: 1;
+}
+DockerContainerCard .base Label {
+  color: gray;
+  dock: left;
+  width: 7;
+}
+
+DockerContainerCard .compose {
+  height: 100%;
+}
+DockerContainerCard .compose Div {
+  height: 1;
+}
+DockerContainerCard .compose Label {
+  color: gray;
+  dock: left;
+  width: 13;
+}
+
+/*
+           | [b]名前[/] [b]イメージ[/]          | プロジェクト | 詳細       | 停止   | 削除
+ステータス | [b]ポート[/]                       | ディレクトリ | コンソール | 再起動 |
+
+ */
