@@ -32,6 +32,7 @@ class DockerContainerCard(Div):
         super().__init__(*children, name=name, id=id, classes=classes)
         self.container = container
 
+        self.container_id = container.short_id
         self.status = container.status
         self.change_status_label = "|| stop" if container.status == "running" else ">> start"
         self.container_name = container.name
@@ -47,6 +48,7 @@ class DockerContainerCard(Div):
         self.working_dir = container.labels.get("com.docker.compose.project.working_dir", "")
 
     def compose(self) -> ComposeResult:
+        log("DockerContainerCard compose", self.container_id)
         yield Div(
             Static(self.status, classes=self.container.status),
             Static(),
@@ -95,19 +97,30 @@ class DockerContainerCard(Div):
 class ContainersScreen(Screen):
     BINDINGS = [("f5", "reload", "Reload Containers")]
 
-    containers: reactive[list[Container]] = reactive(client.containers.list(all=True))
+    containers: reactive[list[Container]] = reactive([])
 
     def compose(self) -> ComposeResult:
+        log("ContainersScreen compose")
         yield Sidebar()
         yield Div(*[DockerContainerCard(container) for container in self.containers],)
         yield Footer()
 
-    def action_reload(self, ) -> None:
-        log("action_reload")
+    def on_mount(self) -> None:
+        log("on_mount")
         self.containers = client.containers.list(all=True)
+
+    def action_reload(self, ) -> None:
+        containers = client.containers.list(all=True)
+        self.containers = client.containers.list(all=True)
+        log("action_reload")
         cards = self.query("DockerContainerCard")
         if cards:
             cards.refresh()
+
+        for container in containers:
+            log("containers", container.short_id, container.status)
+        for container in self.containers:
+            log("self.containers", container.short_id, container.status)
 
 
 class ImagesScreen(Screen):
